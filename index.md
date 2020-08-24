@@ -2,4 +2,4 @@
 
 
 ## Project Proposal 
-click [here](https://github.com/pjournal/boun01g-biktik-r-tik/Project-Proposal.html)
+click [here]((https://pjournal.github.io/boun01g-biktik-r-tik/Project-Proposal.html))
