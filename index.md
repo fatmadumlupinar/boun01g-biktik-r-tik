@@ -25,7 +25,7 @@ click [here](https://pjournal.github.io/boun01g-biktik-r-tik/Project-Proposal.ht
 ## Bonus Assignment: reticulate Package Tutorial
 - Proposal 
 Selected package to introduce is [reticulate](https://cran.r-project.org/web/packages/reticulate/index.html).
-Short description and functions in the package are available [here](https://www.rdocumentation.org/packages/reticulate/versions/1.16)
+Short description and functions in the package are available [here](https://www.rdocumentation.org/packages/reticulate/versions/1.16).
 
 - Written tutorial using RMarkdown
 - Video tutorial of presentation
