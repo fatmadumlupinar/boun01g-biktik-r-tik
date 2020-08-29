@@ -20,7 +20,7 @@ click [here](https://pjournal.github.io/boun01g-biktik-r-tik/Project-Proposal.ht
 
 ## Group Assignment: New York City Airbnb Open Data - Kaggle
 - Data Source: [NYC Airbnb Open Data](https://www.kaggle.com/dgomonov/new-york-city-airbnb-open-data)
-- Analysis using dplyr, ggplot2 and rmarkdown: [NYC Airbnb Analysis](GroupAssignment.html)
+- Analysis using dplyr, ggplot2 and rmarkdown : [NYC Airbnb Analysis](GroupAssignment.html)
 - Shiny app for the analysis
 
 ## Bonus Assignment: reticulate Package Tutorial
