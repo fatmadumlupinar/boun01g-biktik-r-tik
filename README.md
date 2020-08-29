@@ -1,6 +1,6 @@
 # boun01g-biktik-r-tik
 
-This is group Dol_R's [Progress Journal website](https://pjournal.github.io/boun01g-biktik-r-tik/) created for IE 48A course at Boğaziçi University.
+This is group biktik-r-tik's  [Progress Journal website](https://pjournal.github.io/boun01g-biktik-r-tik/) created for IE 48A course at Boğaziçi University.
 
 [Project Proposal](https://pjournal.github.io/boun01g-biktik-r-tik/Project-Proposal.html)
 # Group Members and Personal Progress Journals
