@@ -1,0 +1,109 @@
+---
+title: "The mosts"
+author: "Alican Yılmaz"
+date: "8/29/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(tidyverse)
+library(png)
+library(grid)
+library(tm)
+library(SnowballC)
+library("wordcloud")
+library("RColorBrewer")
+library(rio)
+library(lubridate)
+
+
+
+
+
+object_csv<-read.csv("AB_NYC_2019.csv",sep=",")
+
+saveRDS(object_csv, file = "my_data.rds")
+object_rds<-readRDS(file = "my_data.rds")
+
+object_rds$last_review<-as.POSIXct(object_rds$last_review,format="%Y-%m-%d")
+object_rds$reviews_per_month[is.na(object_rds$reviews_per_month)] <- 0
+object_rds$room_type<-as.factor(object_rds$room_type)
+```
+
+
+
+
+
+## 1) The Most Expensive Neighbourhood with their Group
+
+Another analysis is to demonstrate which neighbourhoods are the most expensive ones and to which neighbourhood groups they belongs. For this purpose, `neighbourhood` data frame is created.
+
+```{r echo=FALSE, message=FALSE}
+
+ neighbourhood<-object_rds%>%
+  select(neighbourhood,neighbourhood_group,price,
+         number_of_reviews,availability_365)%>%
+  group_by(neighbourhood,neighbourhood_group)%>%
+  summarise(mean_price=mean(price),
+            mean_availability=mean(availability_365),
+            mean_popularity=mean(number_of_reviews))
+  
+
+neighbourhood%>%
+  arrange(desc(mean_price))%>%
+  head(40)%>%
+ggplot(.,aes(x=mean_price,y=reorder(neighbourhood,mean_price),fill=neighbourhood_group)) +
+  geom_col()+
+  labs(fill="Neighbour Group",
+       x="Average Prices",
+       y="Neighbourhood Name",
+       title="The Most Expensive Neighbourhood with their Group")+
+  theme_minimal()
+```
+
+Manhattan has the maximum number of neighbourhoods in top 40. However, the most 2 expensive neighbourhood belongs to Staten Island. So, Manhattan is the most expensive neighbourhood group in general whereas there are some other specific neighbourhoods in other neighbourhood groups.
+
+
+## 2) The Most Available Neighbourhood with their Group
+
+The same data frame created before for “The Most Expensive Neighbourhood with their Group” plot is used to demonstrate which neighbourhoods are the most available ones and to which neighbourhood groups they belongs. Availability is found by calculating average number of available days of a house/room in a year for each neighbourhood.
+
+```{r echo=FALSE}
+
+neighbourhood%>%
+  arrange(desc(mean_availability))%>%
+  head(40)%>%
+ggplot(.,aes(x=mean_availability,y=reorder(neighbourhood,mean_availability),fill=neighbourhood_group)) +
+  geom_col()+
+  labs(fill="Neighbour Group",
+       x="Average Number of Available Days (yearly)",
+       y="Neighbourhood Name",
+       title="The Most Available Neighbourhood with their Group")+
+  theme_minimal()
+```
+
+Pink color is the most apparent in the plot, which means Staten Island has the maximum number of the most available neighbourhoods. However, except for Manhattan and Brooklyn, the other two neighbourhood groups are close to Staten Island in terms of availability.
+
+## 3)The Most Popular Neighbourhood with their Group
+
+`neighbourhood` data frame is also used for “The Most Popular Neighbourhood with their Group” plot to show the most popular neighbourhoods by their neighbourhood groups. Popularity is calculated as average number of reviews of posts for each neighbourhood.
+
+```{r echo=FALSE}
+
+neighbourhood%>%
+  arrange(desc(mean_popularity))%>%
+  head(40)%>%
+ggplot(.,aes(x=mean_popularity,y=reorder(neighbourhood,mean_popularity),fill=neighbourhood_group)) +
+  geom_col()+
+  labs(fill="Neighbour Group",
+       x="Average Number of Reviews",
+       y="Neighbourhood Name",
+       title="The Most Popular Neighbourhood with their Group")+
+  theme_minimal()
+```
+
+Manhattan, the most expensive neighbourhood group, does not have any neigbourhood in top 40 list in terms of popularity. Neighbourhood group which has neighbourhoods in the list most is Staten Island while Queens and Bronnx have also great number.
