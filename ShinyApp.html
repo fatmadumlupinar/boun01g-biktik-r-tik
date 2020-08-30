@@ -382,13 +382,16 @@ summary {
 <p>In this app, we create maps and plots for New York Airbnb listings.<br />
 Data source: <a href="https://www.kaggle.com/dgomonov/new-york-city-airbnb-open-data">NYC Airbnb Open Data</a><br />
 Analysis: <a href="https://pjournal.github.io/boun01g-biktik-r-tik/GroupAssignment.html">NYC Airbnb Analysis</a></p>
+<p><strong>The app can be run by entering the code below: </strong></p>
+<p>shiny::runGitHub(‘pjournal/boun01g-biktik-r-tik’,subdir=‘Shiny App.R’,ref= ‘gh-pages’)</p>
 <div id="libraries" class="section level3">
 <h3>Libraries</h3>
-<pre class="r"><code>pti &lt;- c(&quot;shiny&quot;,&quot;tidyverse&quot;,&quot;leaflet&quot;,&quot;knitr&quot;,&quot;markdown&quot;)
+<pre class="r"><code>pti &lt;- c(&quot;shiny&quot;,&quot;tidyverse&quot;,&quot;leaflet&quot;,&quot;knitr&quot;,&quot;markdown&quot;, &quot;png&quot;, &quot;grid&quot;,&quot;tm&quot;, &quot;SnowballC&quot;, &quot;wordcloud&quot;,&quot;RColorBrewer&quot;,&quot;rio&quot;,&quot;lubridate&quot;)
 pti &lt;- pti[!(pti %in% installed.packages())]
 if(length(pti)&gt;0){
     install.packages(pti)
 }
+
 
 library(shiny)
 library(tidyverse)
@@ -398,8 +401,7 @@ library(markdown)</code></pre>
 </div>
 <div id="getting-data-ready-preparations" class="section level3">
 <h3>Getting data ready &amp; preparations</h3>
-<pre class="r"><code>#read data
-air_bnb_data &lt;- read.csv(&quot;https://github.com/pjournal/boun01g-biktik-r-tik/blob/gh-pages/AB_NYC_2019.csv?raw=true&quot;)
+<pre class="r"><code>air_bnb_data &lt;- read.csv(&quot;AB_NYC_2019.csv&quot;)
 
 # Prepare data
 air_bnb_data_filtered &lt;- 
@@ -537,8 +539,8 @@ names(room_types) &lt;- NULL</code></pre>
 <div id="run-the-application" class="section level3">
 <h3>Run the application</h3>
 <pre class="r"><code>shinyApp(ui = ui, server = server)</code></pre>
-<p>The app can be run by entering the code below<br />
-shiny::runGitHub(‘pjournal/boun01g-biktik-r-tik’,subdir=‘Shiny App.R’,ref= ‘gh-pages’)</p>
+<p><strong>The app can be run by entering the code below: </strong></p>
+<p>shiny::runGitHub(‘pjournal/boun01g-biktik-r-tik’,subdir=‘Shiny App.R’,ref= ‘gh-pages’)</p>
 </div>
 
 
