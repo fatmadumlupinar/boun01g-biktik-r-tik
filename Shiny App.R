@@ -23,10 +23,6 @@ library(knitr)
 library(markdown)
 
 
-#read data
-#air_bnb_data <- read.csv("https://github.com/pjournal/boun01g-biktik-r-tik/blob/gh-pages/AB_NYC_2019.csv?raw=true")
-#air_bnb_data
-setwd("C:/Users/Asus/Desktop/Summer 2020/IE 48A/kaggle group assignment")
 air_bnb_data <- read.csv("AB_NYC_2019.csv")
 # Prepare data
 air_bnb_data_filtered <- 
@@ -160,7 +156,7 @@ server <- function(input, output) {
         addProviderTiles("CartoDB.Positron") %>%
         addMarkers(data = plot_df,lat = ~latitude, lng = ~longitude ,popup = ~name, clusterOptions = markerClusterOptions(), label = content)
     })
-    #airbnbRMD <- url('https://github.com/pjournal/boun01g-biktik-r-tik/blob/gh-pages/airbnb.Rmd')
+    
     output$markdown <-renderUI({
       HTML(markdown::markdownToHTML(knit("airbnb.Rmd",quiet=TRUE)))
     })
