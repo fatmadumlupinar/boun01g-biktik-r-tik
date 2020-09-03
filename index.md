@@ -15,11 +15,9 @@
 - [Tümay Kır](https://pjournal.github.io/boun01-tumaykir/)
 
 
-## Project Proposal 
-click [here](https://pjournal.github.io/boun01g-biktik-r-tik/Project-Proposal.html)
-
-## Project Exploratory Data Analysis
-click [here](https://pjournal.github.io/boun01g-biktik-r-tik/analysis/final-markdown.html)
+## Group Project
+- [Project Proposal ](https://pjournal.github.io/boun01g-biktik-r-tik/Project-Proposal.html)
+- [Exploratory Data Analysis](https://pjournal.github.io/boun01g-biktik-r-tik/analysis/final-markdown.html)
 
 ## Group Assignment: New York City Airbnb Open Data - Kaggle
 - Data Source : [NYC Airbnb Open Data](https://www.kaggle.com/dgomonov/new-york-city-airbnb-open-data)
