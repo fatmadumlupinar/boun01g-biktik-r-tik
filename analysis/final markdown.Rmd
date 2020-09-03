@@ -1,6 +1,6 @@
 ---
 title: "IE 48A Group Project"
-subtitle: "Number of Monthly Yourist Visits to Turkey"
+subtitle: "Number of Monthly Tourist Visits to Turkey"
 author: "Bıktık R-tık"
 date: "9/3/2020"
 output: 
