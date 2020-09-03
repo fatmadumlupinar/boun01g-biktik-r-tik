@@ -127,7 +127,6 @@ It's worth checking the months in which the most tourists visited Turkey.
 monthly_sum <- raw_df %>% mutate(month=month(Date)) %>% select(`Grand Total`,month,-Date) %>% relocate(month) %>% group_by(month) %>% summarise(sum=sum(`Grand Total`))
 
 ggplot(monthly_sum) + geom_col(aes(x=month,y=sum)) + labs(title = "Visitors by Month", x="Month", y="Number of visitors") + theme_minimal() 
-#Add names of the months here
 ```
 
 ## Seosonality Analysis
@@ -157,7 +156,7 @@ total_df %>% ggplot(aes(x=Date, y= ts.sa)) +geom_line() + theme_minimal() #put l
 
 
 ```{r seosonality4, message=FALSE, warning=FALSE}
-seasonplot(ts.sa, 12, col=rainbow(13), season.labels=TRUE, year.labels=TRUE, main="Seasonal Visitors") #Make these clearer?
+seasonplot(ts.sa, 12, col=rainbow(13), season.labels=TRUE, year.labels=TRUE, main="Seasonal Visitors") 
 ```
 
 We can see that the tourist data in 2020 is very different than the rest and downwards trending due to Covid-19.
