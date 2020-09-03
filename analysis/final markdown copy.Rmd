@@ -1,0 +1,705 @@
+---
+title: "IE 48A Group Project"
+subtitle: "Number of Monthly Yourist Visits to Turkey"
+author: "Bıktık R-tık"
+date: "9/3/2020"
+output: 
+  html_document:
+          toc: true
+          toc_depth: 3
+          code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+pti <- c("tidyverse","readxl","zoo","dplyr","ggplot2","tidyr","lubridate","forecast","janitor","rmarkdown","plotly","stringi","scales","textshape")
+pti <- pti[!(pti %in% installed.packages())]
+if(length(pti)>0){
+    install.packages(pti)
+}
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(tidyverse)
+library(lubridate)
+library(readxl)
+library(forecast)
+library(zoo)
+library(janitor)
+library(plotly)
+library(rmarkdown)
+library(stringi)
+library(scales)
+library(textshape)
+```
+
+# Downloading Data
+
+This is the exploratory data analysis of Turkey's incoming tourist's nationalities between 2008 and 2020. The data is downloaded from [TCMB's website](https://evds2.tcmb.gov.tr/index.php?/evds/dashboard/4821) and translated to English. 
+
+```{r download, message=FALSE, warning=FALSE}
+raw_df <- read_excel("milliyetlere_gore_ziyaretci_sayisi.xlsx")
+
+raw_df %>% glimpse()
+```
+
+As it can be seen, the data frame includes 150 observations of 103 groups, 1 of them being the Date (in the form of Year-Month), 96 of them being individual countries and 6 of them being groups of countries.
+
+# Preprocessing Data
+
+First, we need to convert the date column into `dttm` format instead of `chr`.
+
+```{r preprocess, message=FALSE, warning=FALSE}
+#Parsing the Date column and changing them to required format
+raw_df$Date <- parse_date_time(raw_df$Date, "ym")
+
+raw_df %>% select(Date) %>% glimpse()
+
+#Let's form another data frame not including the totals
+df <- raw_df %>% select(-contains("Total")) 
+
+#These are the unique country names
+countries <- df %>% select(-Date) %>% colnames()
+```
+
+# Data Analysis
+
+## Total visitors from countries by year and month
+
+Let's analyze which countries visited Turkey in this period the most and the least, both in terms of total tourists and average tourists per month and the number of visitors by those countries. Below are the top 10 countries that visited Turkey the most and the least:
+
+```{r topbottom, message=FALSE, warning=FALSE}
+totalsums <- df %>% select(-Date) %>% summarise(across(everything(),sum)) %>% sort(decreasing = TRUE) 
+top10_s <- t(totalsums %>% select(1:10))
+last10_s <- t(totalsums %>% select(87:96))
+top10_s
+last10_s
+
+totalmeans <- df %>% select(-Date) %>% summarise(across(everything(),mean)) %>% sort(decreasing = TRUE) 
+top10_m <- t(totalmeans %>% select(1:10))
+last10_m <- t(totalmeans %>% select(87:96))
+top10_m
+last10_m
+```
+
+Interestingly, both lists have the same countries in terms of means and averages, so we can put them in the same data frame.
+
+```{r together, message=FALSE, warning=FALSE}
+top10 <- bind_cols(means = top10_m, sums= top10_s, names= rownames(top10_m)) 
+last10 <- bind_cols(means = last10_m, sums= last10_s, names= rownames(last10_m)) 
+
+
+top10  %>% ggplot(aes(x=names, y=means, fill=names)) + geom_col() +theme_minimal() + theme(legend.position = "None") 
+last10 %>% ggplot(aes(x=names, y=means,fill=names)) + geom_col() +theme_minimal() +  theme(legend.position = "None") 
+```
+
+We can also check which country visited Turkey the most each year & month:
+
+```{r most, message=FALSE, warning=FALSE}
+#Creating a data frame with yearly aggregates
+year_df <- df %>% mutate(Year= year(Date)) %>% select (-Date) %>% relocate(Year) %>% group_by(Year) %>% summarise_all(list(sum))
+
+#Finding the name of the country which is maximum of each year
+year_df$max = names(year_df)[apply(year_df, 1, which.max)]
+year_df %>% select(Year,max)
+
+month_df <- df %>% mutate(Month= month(Date)) %>% select (-Date) %>% relocate(Month) %>% group_by(Month) %>% summarise_all(list(sum))
+
+#Finding the name of the country which is maximum of each year
+month_df$max = names(month_df)[apply(month_df, 1, which.max)]
+month_df %>% select(Month,max)
+```
+
+Let's see which continents the tourists came from the most.
+
+```{r continents, message=FALSE, warning=FALSE}
+total_df <- raw_df %>% select("Date" | contains("Total"))
+
+total_df %>% pivot_longer(.,-Date) %>% ggplot(.,aes(x=Date,y=value,color=name)) + geom_line()
+
+total_df %>% mutate(Year = year(Date)) %>% select(-Date) %>% group_by(Year) %>% summarise_all(list(mean)) %>% 
+  pivot_longer(.,-Year) %>% ggplot(.,aes(x=Year,y=value,color=name)) + geom_line()
+```
+
+It's worth checking the months in which the most tourists visited Turkey. 
+
+```{r seasons, message=FALSE, warning=FALSE}
+monthly_sum <- raw_df %>% mutate(month=month(Date)) %>% select(`Grand Total`,month,-Date) %>% relocate(month) %>% group_by(month) %>% summarise(sum=sum(`Grand Total`))
+
+ggplot(monthly_sum) + geom_col(aes(x=month,y=sum)) + labs(title = "Visitors by Month", x="Month", y="Number of visitors") + theme_minimal() 
+```
+
+## Seosonality Analysis
+
+We can explore the effect of seasonality in the following way:
+
+```{r seosonality, message=FALSE, warning=FALSE}
+ts <- ts(total_df$`Grand Total`, frequency = 12, start = 2008) 
+decomposed <- decompose(ts, type="additive")
+plot(decomposed)
+```
+
+The decomposed plot shows us there is an increased trend, however in 2016, there is a significant drop in the number of tourists, which can be attributed to the coup attempt during that summer.
+
+This is the original plot of the data:
+```{r seosonality2, message=FALSE, warning=FALSE}
+total_df %>% ggplot(aes(x=Date,y=`Grand Total`)) +geom_line() + theme_minimal()
+```
+
+This is the deseasonalized version of the data:
+```{r seosonality3, message=FALSE, warning=FALSE}
+ts.stl <- stl(ts,"periodic") 
+ts.sa <- seasadj(ts.stl) 
+
+total_df %>% ggplot(aes(x=Date, y= ts.sa)) +geom_line() + theme_minimal() 
+``` 
+
+
+```{r seosonality4, message=FALSE, warning=FALSE}
+seasonplot(ts.sa, 12, col=rainbow(13), season.labels=TRUE, year.labels=TRUE, main="Seasonal Visitors")
+```
+
+We can see that the tourist data in 2020 is very different than the rest and downwards trending due to Covid-19.
+
+## Relation Between Number of Visitors and Terrorism in Turkey
+
+Reading the terrorism data:
+```{r,message=FALSE, warning=FALSE}
+ter<-read.csv("globalterrorism_turkey.csv")
+```
+
+```{r,message=FALSE, warning=FALSE,echo=FALSE}
+data_tourist<-raw_df
+```
+Preporocessing the terrorism data:
+```{r,message=FALSE, warning=FALSE}
+terrorism_turkey<-ter%>%filter(country_txt=="Turkey")%>%filter(iyear>=2008)
+terrorism_turkey$natlty1_txt=NULL
+colnames(terrorism_turkey)[6]  <- "City"
+colnames(terrorism_turkey)[7]  <- "County"
+```
+
+Terrorism events are grouped by years and months in order to be examined.
+```{r,message=FALSE, warning=FALSE}
+number_of_events_year<-terrorism_turkey%>%group_by(iyear)%>%count()
+number_of_events_month<-terrorism_turkey%>%group_by(imonth,iyear)%>%count()
+colnames(number_of_events_year)[2]  <- "total"
+colnames(number_of_events_year)[1]  <- "Year"
+number_of_events_year$Year<- as.Date(as.character(number_of_events_year$Year), format = "%Y")
+```
+
+Touristic data is arranged.
+```{r,message=FALSE, warning=FALSE}
+data_tourist_year<-data_tourist%>%pivot_longer(cols=-Date,names_to="Country", values_to="Visits")%>%group_by(Country,year(Date))%>%summarise(Total_year=sum(Visits))
+colnames(data_tourist_year)[2]  <- "Year"
+colnames(data_tourist_year)[3]  <- "Visits"
+```
+
+Terrorism data is analyzed city by city.
+```{r,message=FALSE, warning=FALSE}
+terrorismBycity<-terrorism_turkey%>%group_by(City, iyear)%>%count()
+colnames(terrorismBycity)[2]  <- "Year"
+
+
+yearly_total_visits<-data_tourist_year%>%group_by(Year)%>%summarize(total=sum(Visits))
+yearly_total_visits$Year<- as.Date(as.character(yearly_total_visits$Year), format = "%Y")
+class(yearly_total_visits$Year)
+```
+
+The plot with two scales represent the correlation between the number of tourists and terrorism statistics.
+```{r,message=FALSE, warning=FALSE}
+ggplot() + 
+  geom_bar(mapping = aes(x = yearly_total_visits$Year, y = yearly_total_visits$total), stat = "identity", fill = "black") +
+  geom_line(mapping = aes(x = number_of_events_year$Year, y = number_of_events_year$total*100000), size = 2, color = "blue") + 
+  scale_x_date(name = "Years") +
+  scale_y_continuous(name = "number of tourists", 
+                     sec.axis = sec_axis(~./100000, name = "terrorism", 
+                                         labels = function(b) { paste0(b)})) + 
+  theme(
+    axis.title.y = element_text(color = "black"),
+    axis.title.y.right = element_text(color = "blue"))
+```
+
+## Relation Between Number of Visitors and Development Level of Their Countries 
+
+We used multiple development indicators to analyze number of visitors with respect to the development levels of their countries.  
+
+Indicators used:  
+* GDP per capita  
+* Life expectancy  
+* Human Development Index   
+
+
+```{r,include=FALSE, message=FALSE, warning=FALSE}
+Sys.setlocale("LC_TIME", "C")
+```
+
+**Importing main data:**
+```{r, message=FALSE, warning=FALSE}
+raw_data <- read_xlsx("milliyetlere_gore_ziyaretci_sayisi.xlsx")
+
+raw_data <- raw_data %>%
+   mutate(Date=as.yearmon(Date))
+```
+
+**Creating yearly sums of visitors:**  
+We also took yearly average number of visitors between 2008 and 2018.
+```{r, message=FALSE, warning=FALSE}
+years_total <- raw_data %>%
+  t()
+colnames(years_total)=years_total[1,]
+years_total <- years_total[-1,]
+
+years_total <- as.data.frame(years_total)
+years_total <- rownames_to_column(years_total, "Country Name")
+
+years_total[,2:151] <- as.numeric(unlist(years_total[,2:151]))
+
+years_total<- years_total %>%
+  rowwise() %>%
+  mutate( sum_2008=sum(c_across(`Jan 2008`:`Dec 2008`)),
+          sum_2009=sum(c_across(`Jan 2009`:`Dec 2009`)),
+          sum_2010=sum(c_across(`Jan 2010`:`Dec 2010`)),
+          sum_2011=sum(c_across(`Jan 2011`:`Dec 2011`)),
+          sum_2012=sum(c_across(`Jan 2012`:`Dec 2012`)),
+          sum_2013=sum(c_across(`Jan 2013`:`Dec 2013`)),
+          sum_2014=sum(c_across(`Jan 2014`:`Dec 2014`)),
+          sum_2015=sum(c_across(`Jan 2015`:`Dec 2015`)),
+          sum_2016=sum(c_across(`Jan 2016`:`Dec 2016`)),
+          sum_2017=sum(c_across(`Jan 2017`:`Dec 2017`)),
+          sum_2018=sum(c_across(`Jan 2018`:`Dec 2018`)),
+          sum_2019=sum(c_across(`Jan 2019`:`Dec 2019`)),
+          avg_2008to2018_yearly=mean(c_across(`Jan 2008`:`Dec 2018`))*12
+  ) %>%
+  select('Country Name', sum_2008:sum_2019, avg_2008to2018_yearly)
+```
+
+**Importing GDP per capita data:**  
+Our visitors data includes only the years 2008 to 2020, so we will need GDP per capita for only these years. Also we don't have GDP per capita data for 2020, that's why we took only from 2008 to 2019.  
+```{r, message=FALSE, warning=FALSE}
+GDP_per_capita_data <- read_xls("GDP_per_capita.xls")
+GDP_per_capita_data %>%
+  glimpse()
+
+GDP_per_capita_data <- GDP_per_capita_data %>%
+  select(`Country Name`,`2008`:`2019`) 
+
+GDP_per_capita_data <- as.data.frame(GDP_per_capita_data)
+```
+
+
+**Joining the data:**
+```{r, fig.align='center', warning=FALSE}
+colnames(GDP_per_capita_data)[2:13] <- paste0("GDP_per_capita_", colnames(GDP_per_capita_data)[2:13])
+
+joined_data_GDP_per_capita <- years_total %>%
+  inner_join(GDP_per_capita_data, by=c(`Country Name`= 'Country Name' )) %>%
+  mutate(avg_GDPperCap_2008to2018=mean(c_across(GDP_per_capita_2008:GDP_per_capita_2018), na.rm = TRUE))
+
+```
+
+We divided countries into 4 categories using average GDP per capita quantiles. Then we plotted average GDP per capita with respect to average yearly visitors, colored by GDP per capita level. Also we took sum of yearly average visitors within the groups and plotted a pie chart, in order to see the breakdown of development level of countries of Turkey's visitors.
+```{r, message=FALSE, warning=FALSE}
+q1 <- quantile(joined_data_GDP_per_capita$avg_GDPperCap_2008to2018, na.rm = TRUE)
+
+joined_data_GDP_per_capita <- joined_data_GDP_per_capita %>%
+  mutate(GDP_per_capita_level=case_when((avg_GDPperCap_2008to2018>=q1[1]&avg_GDPperCap_2008to2018<q1[2])~"very low",
+                                        (avg_GDPperCap_2008to2018>=q1[2]&avg_GDPperCap_2008to2018<q1[3])~"low",
+                                        (avg_GDPperCap_2008to2018>=q1[3]&avg_GDPperCap_2008to2018<q1[4])~"medium",
+                                        (avg_GDPperCap_2008to2018>=q1[4]&avg_GDPperCap_2008to2018<=q1[5])~"high" 
+                                        )
+         )
+
+
+joined_data_GDP_per_capita %>%
+  ggplot(aes(x=avg_2008to2018_yearly,y=avg_GDPperCap_2008to2018, color=GDP_per_capita_level),fig.align='center')+
+  geom_point()
+
+GDP_per_capita_level_grouped <- joined_data_GDP_per_capita %>%
+  group_by(GDP_per_capita_level) %>%
+  summarise(sum=sum(avg_2008to2018_yearly))
+
+ggplot(GDP_per_capita_level_grouped, aes(x="",y=sum,fill=GDP_per_capita_level))+geom_bar(stat="identity",width=1)+coord_polar("y")+labs(x="",y="sum")
+```
+Top 5 countries whose citizens visited Turkey the most belong either high or low GDP per capita levels. It is worth to mention that people whose countries belong to the medium category do not visit Turkey much, unlike high and low categories.     
+
+**Importing life expectancy data of countries:**
+```{r, message=FALSE, warning=FALSE}
+life_expectancy_data <- read_xls("Life_expectancy.xls")
+
+life_expectancy_data %>%
+  glimpse()
+
+life_expectancy_data <- life_expectancy_data %>%
+  select(`Country Name`,`2008`:`2018`)
+
+life_expectancy_data <- as.data.frame(life_expectancy_data)
+
+```
+
+**Joining the data:**
+```{r fig.align='center', message=FALSE, warning=FALSE}
+colnames(life_expectancy_data)[2:12] <- paste0("life_expectancy_", colnames(life_expectancy_data)[2:12])
+
+joined_data_life_expectancy <- years_total %>%
+  inner_join(life_expectancy_data, by=c('Country Name'='Country Name')) %>%
+  mutate(avg_life_expectancy_2008to2018=mean(c_across(life_expectancy_2008:life_expectancy_2018)))
+
+```
+
+We divided countries into 4 categories using average life expectancy quantiles. Then we plotted average life expectancy with respect to average yearly visitors, colored by life expectancy level of countries. We also took sum of yearly average visitors within the groups and plotted a pie chart,in order to see the breakdown of development level of countries of Turkey's visitors.
+```{r message=FALSE, warning=FALSE}
+
+q2 <- quantile(joined_data_life_expectancy$avg_life_expectancy_2008to2018, na.rm = TRUE)
+
+joined_data_life_expectancy <- joined_data_life_expectancy %>%
+  mutate(life_expectancy_level=case_when((avg_life_expectancy_2008to2018>=q2[1]&avg_life_expectancy_2008to2018<q2[2])~"very low",
+                                        (avg_life_expectancy_2008to2018>=q2[2]&avg_life_expectancy_2008to2018<q2[3])~"low",
+                                        (avg_life_expectancy_2008to2018>=q2[3]&avg_life_expectancy_2008to2018<q2[4])~"medium",
+                                        (avg_life_expectancy_2008to2018>=q2[4]&avg_life_expectancy_2008to2018<=q2[5])~"high" 
+  )
+  )
+
+
+joined_data_life_expectancy %>%
+  ggplot(aes(x=avg_2008to2018_yearly,y=avg_life_expectancy_2008to2018, color=life_expectancy_level)) +
+  geom_point()
+
+life_expectancy_level_grouped <- joined_data_life_expectancy %>%
+  group_by(life_expectancy_level) %>%
+  summarise(sum=sum(avg_2008to2018_yearly))
+
+ggplot(life_expectancy_level_grouped, aes(x="",y=sum,fill=life_expectancy_level))+geom_bar(stat="identity",width=1)+coord_polar("y")+labs(x="",y="sum")
+```
+Unlike the pie chart for GDP per capita, life expectancy pie chart is not far from a equally divided pie.
+
+**Importing Human Development Index (HDI) data:**
+```{r, message=FALSE, warning=FALSE}
+
+HDI_data <- read_xlsx("Human_development_index_HDI.xlsx")
+
+HDI_data %>%
+  glimpse()
+
+colnames(HDI_data) <- gsub("X","",colnames(HDI_data))
+
+HDI_data <- HDI_data %>%
+  select('Country Name'= Country, '2008':'2018')
+
+HDI_data <- as.data.frame(HDI_data)
+
+```
+
+
+**Joining and plotting the data:**   
+We also classified countries by their HDI into 4 categories: "very high", "high", "medium" and "low" 
+(source: <https://en.wikipedia.org/wiki/Developed_country> )
+```{r, message=FALSE, warning=FALSE}
+colnames(HDI_data)[2:12] <- paste0("HDI_", colnames(HDI_data)[2:12])
+
+HDI_data[,2:12] <- as.numeric(unlist(HDI_data[,2:12]))
+
+joined_data_HDI <- years_total %>%
+  inner_join(HDI_data, by=c('Country Name'='Country Name')) %>%
+  mutate(avg_HDI_2008to2018=mean(c_across(HDI_2008:HDI_2018),na.rm = TRUE)) %>%
+  mutate(HDI_level=case_when(avg_HDI_2008to2018>=0.8~"very high",
+                             (avg_HDI_2008to2018<0.8&avg_HDI_2008to2018>=0.7)~"high",
+                             (avg_HDI_2008to2018<0.7&avg_HDI_2008to2018>=0.55)~"medium",
+                             avg_HDI_2008to2018<0.55~"low"
+                             )
+         )
+
+joined_data_HDI %>%
+  ggplot(aes(x=avg_2008to2018_yearly,y=avg_HDI_2008to2018, color=HDI_level)) +
+  geom_point()
+
+HDI_level_grouped <- joined_data_HDI %>%
+  group_by(HDI_level) %>%
+  summarise(sum=sum(avg_2008to2018_yearly))
+
+ggplot(HDI_level_grouped, aes(x="",y=sum,fill=HDI_level))+geom_bar(stat="identity",width=1)+coord_polar("y")+labs(x="",y="sum")
+
+```
+
+Besides given levels, we also wanted to analyze levels by quantile, like we did with other metrics.
+```{r message=FALSE, warning=FALSE}
+q3 <- quantile(joined_data_HDI$avg_HDI_2008to2018, na.rm = TRUE)
+
+joined_data_HDI <- joined_data_HDI %>%
+  mutate(HDI_level_by_quantile=case_when((avg_HDI_2008to2018 >=q3[1]&avg_HDI_2008to2018<q3[2])~"very low",
+                                         (avg_HDI_2008to2018>=q3[2]&avg_HDI_2008to2018<q3[3])~"low",
+                                         (avg_HDI_2008to2018>=q3[3]&avg_HDI_2008to2018<q3[4])~"medium",
+                                         (avg_HDI_2008to2018>=q3[4]&avg_HDI_2008to2018<=q3[5])~"high" 
+  )
+  )
+
+HDI_level_by_quantile_grouped <- joined_data_HDI %>%
+  group_by(HDI_level_by_quantile) %>%
+  summarise(sum=sum(avg_2008to2018_yearly))
+
+joined_data_HDI %>%
+  ggplot(aes(x=avg_2008to2018_yearly,y=avg_HDI_2008to2018, color=HDI_level_by_quantile)) +
+  geom_point()
+
+ggplot(HDI_level_by_quantile_grouped, aes(x="",y=sum,fill=HDI_level_by_quantile))+geom_bar(stat="identity",width=1)+coord_polar("y")+labs(x="",y="sum")
+
+```
+
+
+## Visa Policy of Turkey 
+
+```{r,echo=FALSE}
+data<-read_excel("milliyetlere_gore_ziyaretci_sayisi.xlsx")
+```
+
+```{r, message=FALSE, warning=FALSE}
+visa<-read_excel("vize_muafiyeti.xlsx")
+```
+
+
+```{r, echo=FALSE}
+data$Date <- parse_date_time(data$Date, "ym")
+```
+
+pivot_longer() function is used to transpose the data.
+```{r, message=FALSE, warning=FALSE}
+data_transpose<-data%>%pivot_longer(cols=-Date,names_to="Free Visa")
+```
+`data_year` contains the total number of visits with respect to years.
+```{r, message=FALSE, warning=FALSE}
+data_year<-data_transpose%>%group_by(year(Date), `Free Visa`)%>%summarise(total=sum(value))
+```
+`data_countries` vector states the names of the regions and countries.
+
+```{r, message=FALSE, warning=FALSE}
+data_countries<-data%>%select(-Date)%>%names()
+```
+
+In order to find the intersection between the countries which don’t need visa for entering Turkey and and the original data frame, inner_join() function is used. Therefore, a new column that shows the need for visa is created. “1” is assigned to these countries, which means that they are allowed to enter the country without visa.
+```{r, message=FALSE, warning=FALSE}
+free_visa_df<- data_transpose%>%inner_join(visa,by="Free Visa")
+free_visa_df[,4]<-1
+colnames(free_visa_df)[4]  <- "Visa"
+colnames(free_visa_df)[2]  <- "Country"
+```
+
+The other countries, which require to have visa for visits in Turkey, are assigned to “0”. Some column names are arranged for clarification.
+
+```{r, message=FALSE, warning=FALSE}
+no_visa_df<-data_transpose%>%anti_join(visa,by="Free Visa")
+no_visa_df[,4]<-0
+colnames(no_visa_df)[4]  <- "Visa"
+colnames(no_visa_df)[2]  <- "Country"
+```
+
+Then, two data frame `free_visa_df` and `no_visa_df` is merged and `total_data`  is obtained. Now, the need for visa is clearly shown in single data frame.
+
+```{r, message=FALSE, warning=FALSE}
+#1 means free visa
+#0 means that visa is needed
+
+total_data<- free_visa_df%>%full_join(no_visa_df,by=c("Visa","Date","Country","value"))
+```
+
+
+`sum_data` represents the number of visits according to countries and years as well as the visa information. `sum_byvisa` data frame examines the effect of visa requirent closely. It summarizes all the countries and years in terms of visa requirement by calculating the mean and sum of visits. Thus, even though many country can enter Turkey without visa, the others visits much more than the visa-free ones. So, the need for visa doesn’t have a significant effect on the number of visits to Turkey.
+
+```{r, message=FALSE, warning=FALSE}
+sum_data<-total_data%>%group_by(Country,Visa, year(Date))%>%summarise(total=sum(value))
+sum_byvisa<-total_data%>%group_by(Visa)%>%summarise(mean=mean(value),total=sum(value))
+```
+
+
+The continent and region names are removed from the data because they don’t contain any visa information. And, the visit data is ranked in descending order.
+
+```{r, message=FALSE, warning=FALSE}
+ranked_final<-sum_data%>%arrange(desc(total))  
+ranked_final<-ranked_final[!grepl("Total|Africa|Other", ranked_final$Country),]
+head(ranked_final,10)
+tail(ranked_final,10)
+```
+
+In the final plot, the points show the number of total visits to Turkey, country by country. Red points state that this country on the x-axis is not allowed to enter Turkey without visa. Blue dots represent that free-visa countries, which are free to enter the country without visa.
+
+```{r, fig.width = 12, message=FALSE, warning=FALSE}
+
+ggplot(ranked_final,aes(x=Country,y=total,color=factor(Visa)))+
+  geom_point()+
+  scale_y_continuous(labels = unit_format(unit = "M", scale = 1e-6))+
+  theme(axis.text.x = element_text(angle = 80, vjust = .5)) 
+```
+
+
+## Analysis of Exchange Rates and Visitors 
+
+In this part, an analysis of change of exchange rates ,and whether it has salient effects on the  number of tourists is conducted. For that purpose, "Euro/Turkish Lira and Dollar/Turkish Lira exchange rates" and "total visitors from Europe and USA" between 2008 and 2020 are used as variables. .  
+
+Related data is gathered from the sources and data preparation is conducted through cleaning, filtering and reframing the data. Below, you can see the coding part by clicking the `code` box on the right side.  
+
+```{r Data_Preprocessing, , message=FALSE, warning=FALSE}
+
+mil <- read_xlsx("milliyetlere_gore_ziyaretci_sayisi.xlsx")
+
+mil <- mil %>%
+  mutate(Date=as.yearmon(Date)) %>% mutate(Date=as.Date(Date))
+
+euro_dolar<- read_csv("euro-dollar.csv",guess_max = 100,
+                      col_types = cols(
+                        "Tarih" = col_date(format="%Y-%m"),
+                        "TP DK EUR A YTL" = col_number(),
+                        "TP DK USD A YTL" = col_number()
+                      ))
+#NA values stems from the source information etc
+
+
+#rename
+
+names(euro_dolar)=c("Date", "euro_tl_exchange_rate","dollar_tl_exchange_rate") 
+
+#getting related columns
+
+euro_dolar_tidy<-euro_dolar %>%
+  as.data.frame %>%
+  slice(1:150) 
+
+#preparing data for visualization
+
+euro_dolar_2<-euro_dolar_tidy%>%
+  pivot_longer(!Date,names_to="exchange_type",values_to="rate")
+
+
+```
+
+### Exchange Rate Analysis
+
+The change in the exchange rates of both EURO and DOLLAR is examined from the first month of 2008 untill sixth month of 2020. For that, first data preproccesing is done, and secondly, data is analyzed and visualized for a better understanding with the help of `dplyr ` and `ggplot2` packages. 
+
+```{r plotting_exchange rate, fig.align = 'center', message=FALSE, warning=FALSE}
+#ploting line graph to see exchange rate by time
+
+ggplot<-ggplot(euro_dolar_2,aes(Date,rate,color=exchange_type))+ 
+  geom_line(size=1)+
+  labs(x="Years", y="Exchange rate", title="Exchange Rate by Years(2008-2020)")+
+  theme_minimal()
+  
+  
+ggplotly(ggplot)
+```
+
+From the graph, it can be observed that, within the given time frame, euro and dollar tend to increase correlatedly, euro being slightly higher than dollar. Thus, Turkish Lira has been in a trend of losing value for years. 
+
+### Number of Visitor and Exchange Rate Comparison
+
+In this part, total number of visitors from Europe and USA, and the change of exchange rate in Euro and Dollar is examined to better understand if a correlation and/or trend exist between the two. For that purpose, first, `the euro_dolar_tidy` dataset and related columns(i.e AVRUPATOP and ABD) of `mil` dataset are joined together by years: 
+
+```{r joining two datasets, message=FALSE, warning=FALSE}
+usa_and_total_europe<-mil[1:150,c("Date","United States","Total Europe")]
+
+#joining two data_sets(Here, we observe that it is perfectly matched.(i.e no NA field))
+joined_data<-usa_and_total_europe %>%
+  left_join(euro_dolar_tidy,by=c("Date"))
+```
+
+Here, you can see how the combined data looks like: 
+
+```{r joined_data, echo=FALSE, message=FALSE, warning=FALSE}
+head(joined_data)
+```
+
+Total visitors from Europe and Euro/TL exchange rate can be analyzed and visualized with the help of `ggplot2` and `plotly`:
+
+```{r Exchange_rate_Total_visitor_comparison_Europe, echo=FALSE,warning=FALSE, fig.align = 'center', message=FALSE, warning=FALSE}
+ggplot2<-joined_data %>%
+    select(c(Date,euro_tl_exchange_rate,`Total Europe`)) %>%
+    slice(-1) %>%
+    pivot_longer(!Date)%>%
+    ggplot(.,aes(x=Date,y=value,color=name))+
+    geom_line()+
+    xlim(min(joined_data$Date),max(joined_data$Date))+
+    facet_wrap(~name,scales="free")
+  ggplotly(ggplot2)
+```
+
+By examining both of the graphs, it can be observed that total number of tourists from Europe to Turkey have an oscillating shape, which means the change in the number of visitors is seasonal( most visitors can be observed during summer months) rather than being correlated with the exchange rate of Euro/TL. Although total number of tourists from Europe has an increasing trend after a significant decrease in 2016, there is still not enough evidence to infer that the increase in tourists is due to the increase in Euro/tl currency. The sharp decrease in 2016 might be, mostly, due to the political  geopolitical risks related to the political climate of Turkey at the times. Also, the sharp decrease after March-2020 stems from the COVID-19 epidemic and its global effects. 
+
+```{r Exchange_rate_Total_visitor_comparison_USA, echo=FALSE, fig.align = 'center', message=FALSE, warning=FALSE}
+ggplot3<-joined_data %>%
+    select(c(Date,dollar_tl_exchange_rate,`United States`)) %>%
+    slice(-1) %>%
+    pivot_longer(!Date)%>%
+    ggplot(.,aes(x=Date,y=value,color=name))+
+    geom_line()+
+    xlim(min(joined_data$Date),max(joined_data$Date))+
+    facet_wrap(~name,scales="free")
+  ggplotly(ggplot3)
+```
+ 
+ Similar seasonality can be observed in the number of USA visitors as in Europe. However, the month where peak value in the number of visitors is seen slightly differs from European Tourists, and also between the years. For instance, the peak is observed in October during the years 2008-2009 and 2011, whereas in 2012-2013 and 2019 peak value is seen in July during summer season. Similar to Europe, total visitors has decreased during 2016 probably due to same reasons as mentioned above. Also, the sharp decrease after March-2020, again,  stems from the COVID-19 epidemic and its global effects.
+ 
+## The Effect of Distance Between Turkey and the Other Countries
+
+Average number of tourists per year for each country should be calculated firstly to make an analysis for each year. `Data` is created again and again for the years from 2008 to 2020 to receive these mean values of tourists from each country via for loop. Some rows are deleted to eliminate ambiguous non-country data such as "Other Europe Countries".
+
+Distance (between Turkey and specified country) vector is created for each respectively to determine correlation between distance and number of tourists per year. In this way, a correlation vector including correlation values of 13 years is received.
+
+```{r message=FALSE,warning=FALSE}
+cor_data<-c()
+
+for (i in 2008:2020){
+data<-raw_data%>%
+  select(-c('Haymatlos', 'Grand Total'))%>%
+ filter(format(Date, "%Y")==i)%>%
+ pivot_longer(.,cols = -Date,
+             names_to = "names", 
+          values_to = "values")%>%
+  group_by(names)%>%
+  summarise(avg=mean(values))
+
+data1<-data[-c(2,4,7,8,15,24,25,27,28,36,37), ] 
+
+
+
+distance<-c(10066,2350,13004,1295,12551,1977,1080,2500,2045,5389,1646,2709,1538,10708,915,1979,3189,6077,2637,
+            9930,867,2314,3760,8849,2843,2793,7770,792,4566,1744,2682,3301,1048,1802,3596,3322,834,2896,2353,1905,
+            4429,8686,8630,1386,2136,2818,3376,410,11286,1249,1575,2130,2063,2000,579,2563,1506,1038,8756,1843,
+            11801,1413,1054,3068,12427,2451,3337,1852,3674,1129,1873,13348,8105,1363,1638,1811,2604,518,1931,
+            3091,6872,2381,2115,1137,894,10388,2884,16624,1122)
+
+cor_data <- c(cor_data, cor(data1$avg,distance))
+
+}
+```
+
+
+We can plot the correlation data to decide if there is a relation between number of tourists and distance.
+
+```{r, message=FALSE, warning=FALSE}
+years<-c(2008:2020)
+yearly_correlation<-data.frame(Years=years,Correlation=cor_data)
+ggplot(yearly_correlation,aes(x=Years, y=Correlation))+geom_col()+ylim(-1,1)+theme_light()+
+  scale_x_continuous(breaks = seq(2008, 2020, by = 1))+theme(axis.text.x=element_text(angle = 90))
+
+```
+
+All the values lay below the zero line, which means there is a negative relationship. So, we can say if distance value increases, number of tourists will decrease. However, it is clear that distance has no a big impact on number of tourists because absoulute value of correlation values is almost zero.
+ 
+## Forecast Plot for Germany
+
+By using `auto.arima` function and data of previous 150 months, the number of visitors from Germany are forecasted and plotted.
+```{r, , message=FALSE, warning=FALSE}
+germany<-mil[1:150,c(1,2)]
+germany_ts<-ts(germany)
+fit<-auto.arima(germany_ts[,2])
+summary(fit)
+fit%>%forecast()%>%autoplot()+xlab("Date")+ylab("Number of Visitors from Germany")
+```
+
+# References
+* GDP per capita data: <https://data.worldbank.org/indicator/NY.GDP.PCAP.CD>  
+* Life expectancy data: <https://data.worldbank.org/indicator/SP.DYN.LE00.IN>  
+* Human Development Index (HDI) data: <http://hdr.undp.org/en/data>
+* Terrorism data: <https://www.kaggle.com/behic1/terrorism-in-turkey>
+* Visa data: <https://gocmenburo.com/turkiyenin-vize-istedigi-ulkeler>
+* Country Development <https://en.wikipedia.org/wiki/Developed_country>
+
+
