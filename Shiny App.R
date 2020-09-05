@@ -99,14 +99,13 @@ rval_filter <- reactive({
         
         
         if(!("All" %in% input$neighbourhood_group)){
-            plot_df<-air_bnb_data_filtered    %>%
+            plot_df<-
                 rval_filter() %>%
                 filter(neighbourhood_group %in% input$neighbourhood_group)
     
         }
         else{
-            plot_df<-air_bnb_data_filtered     %>%
-                rval_filter()
+            plot_df<-rval_filter()
             
         }
         
@@ -115,14 +114,13 @@ rval_filter <- reactive({
     })
     output$table <- renderTable({
         if(!("All" %in% input$neighbourhood_group)){
-            plot_df<-air_bnb_data_filtered    %>%
-                rval_filter() %>%
+            plot_df<-rval_filter() %>%
                 filter(neighbourhood_group %in% input$neighbourhood_group) 
                 
         }
         else{
-            plot_df<-air_bnb_data_filtered     %>%
-                rval_filter()
+            plot_df<-rval_filter()
+                
             
         }
         plot_df
@@ -131,13 +129,11 @@ rval_filter <- reactive({
     output$map <- renderLeaflet({
       
       if(!("All" %in% input$neighbourhood_group)){
-        plot_df<-air_bnb_data_filtered    %>%
-          rval_filter() %>%
+        plot_df<-rval_filter() %>%
           filter(neighbourhood_group %in% input$neighbourhood_group) 
       }
       else{
-        plot_df<-air_bnb_data_filtered     %>%
-          rval_filter()
+        plot_df<-rval_filter()
         
       }
       content <- paste("Price:", plot_df$price)
