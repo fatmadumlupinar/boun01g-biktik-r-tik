@@ -2,7 +2,7 @@
 title: "IE 48A Group Project"
 subtitle: "Number of Monthly Tourist Visits to Turkey"
 author: "Bıktık R-tık"
-date: "9/3/2020"
+date: "September 3, 2020"
 output: 
   html_document:
           toc: true
