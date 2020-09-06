@@ -60,7 +60,8 @@ ui <- fluidPage(
                         min=min(air_bnb_data_filtered$number_of_reviews),
                         max=max(air_bnb_data_filtered$number_of_reviews),
                         value=0),
-            selectInput(inputId="room_type",label="Select room type",choices=room_types)
+            selectInput(inputId="room_type",label="Select room type",choices=room_types),
+            downloadButton("downloadData", "Download")
         ),
         
         # Show a plot of the generated distribution
@@ -80,6 +81,18 @@ ui <- fluidPage(
 
 # Define server logic required to show outputs
 server <- function(input, output) {
+ datasetInput <- reactive({
+        if(!("All" %in% input$neighbourhood_group)){
+            plot_df<-rval_filter() %>%
+                filter(neighbourhood_group %in% input$neighbourhood_group)            
+        }
+        else{
+            plot_df<-rval_filter()            
+        }
+        plot_df
+    })    
+    
+    
 rval_filter <- reactive({
     air_bnb_data_filtered %>%
      filter(number_of_reviews>input$number_of_reviews)   %>%
@@ -145,6 +158,14 @@ rval_filter <- reactive({
     output$markdown <-renderUI({
       HTML(markdown::markdownToHTML(knit("airbnb.Rmd",quiet=TRUE)))
     })
+    output$downloadData <- downloadHandler(
+        filename = function() {
+            paste("airbnb_data", ".csv", sep = "")
+        },
+        content = function(file) {
+            write.csv(datasetInput(), file, row.names = FALSE)
+        }
+    )
 }
 
 # Run the application
