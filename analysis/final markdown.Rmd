@@ -405,7 +405,6 @@ HDI_data <- as.data.frame(HDI_data)
 ```
 
 
-**Joining and plotting the data:**   
 We also classified countries by their HDI into 4 categories: "very high", "high", "medium" and "low" 
 (source: <https://en.wikipedia.org/wiki/Developed_country> )
 ```{r, message=FALSE, warning=FALSE}
@@ -546,7 +545,7 @@ ggplot(ranked_final,aes(x=Country,y=total,color=factor(Visa)))+
 
 ## Analysis of Exchange Rates and Visitors 
 
-In this part, an analysis of change of exchange rates ,and whether it has salient effects on the  number of tourists is conducted. For that purpose, "Euro/Turkish Lira and Dollar/Turkish Lira exchange rates" and "total visitors from Europe and USA" between 2008 and 2020 are used as variables. .  
+In this part, an analysis of change of exchange rates ,and whether it has salient effects on the  number of tourists is conducted. For that purpose, "Euro/Turkish Lira and Dollar/Turkish Lira exchange rates" and "total visitors from Europe and USA" between 2008 and 2020 are used as variables.   
 
 Related data is gathered from the sources and data preparation is conducted through cleaning, filtering and reframing the data. Below, you can see the coding part by clicking the `code` box on the right side.  
 
