@@ -78,8 +78,17 @@ ui <- fluidPage(
     )
 )
 
-# Define server logic required to draw a histogram
+# Define server logic required to show outputs
 server <- function(input, output) {
+rval_filter <- reactive({
+    air_bnb_data_filtered %>%
+     filter(number_of_reviews>input$number_of_reviews)   %>%
+     filter(price>=input$price[1] & price<=input$price[2]) %>%
+     filter(room_type %in% input$room_type)
+    
+    })
+    
+    
     
     output$scatterplot <- renderPlot({
         
@@ -90,17 +99,13 @@ server <- function(input, output) {
         
         
         if(!("All" %in% input$neighbourhood_group)){
-            plot_df<-air_bnb_data_filtered    %>%
-                filter(neighbourhood_group %in% input$neighbourhood_group) %>%
-                filter(number_of_reviews>input$number_of_reviews)   %>%
-                filter(price>=input$price[1] & price<=input$price[2]) %>%
-                filter(room_type %in% input$room_type)
+            plot_df<-
+                rval_filter() %>%
+                filter(neighbourhood_group %in% input$neighbourhood_group)
+    
         }
         else{
-            plot_df<-air_bnb_data_filtered     %>%
-                filter(number_of_reviews>input$number_of_reviews) %>%
-                filter(price>=input$price[1] & price<=input$price[2]) %>%
-                filter(room_type %in% input$room_type)
+            plot_df<-rval_filter()
             
         }
         
@@ -109,17 +114,13 @@ server <- function(input, output) {
     })
     output$table <- renderTable({
         if(!("All" %in% input$neighbourhood_group)){
-            plot_df<-air_bnb_data_filtered    %>%
-                filter(neighbourhood_group %in% input$neighbourhood_group) %>%
-                filter(number_of_reviews>input$number_of_reviews)   %>%
-                filter(price>=input$price[1] & price<=input$price[2]) %>%
-                filter(room_type %in% input$room_type)
+            plot_df<-rval_filter() %>%
+                filter(neighbourhood_group %in% input$neighbourhood_group) 
+                
         }
         else{
-            plot_df<-air_bnb_data_filtered     %>%
-                filter(number_of_reviews>input$number_of_reviews) %>%
-                filter(price>=input$price[1] & price<=input$price[2]) %>%
-                filter(room_type %in% input$room_type)
+            plot_df<-rval_filter()
+                
             
         }
         plot_df
@@ -128,17 +129,11 @@ server <- function(input, output) {
     output$map <- renderLeaflet({
       
       if(!("All" %in% input$neighbourhood_group)){
-        plot_df<-air_bnb_data_filtered    %>%
-          filter(neighbourhood_group %in% input$neighbourhood_group) %>%
-          filter(number_of_reviews>input$number_of_reviews)   %>%
-          filter(price>=input$price[1] & price<=input$price[2]) %>%
-          filter(room_type %in% input$room_type)
+        plot_df<-rval_filter() %>%
+          filter(neighbourhood_group %in% input$neighbourhood_group) 
       }
       else{
-        plot_df<-air_bnb_data_filtered     %>%
-          filter(number_of_reviews>input$number_of_reviews) %>%
-          filter(price>=input$price[1] & price<=input$price[2]) %>%
-          filter(room_type %in% input$room_type)
+        plot_df<-rval_filter()
         
       }
       content <- paste("Price:", plot_df$price)
