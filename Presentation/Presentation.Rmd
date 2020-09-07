@@ -11,10 +11,32 @@ output:
       highlightStyle: github
       highlightLines: true
       countIncrementalSlides: false
+      
 ---
+# Introduction
+
+- This [data](https://evds2.tcmb.gov.tr/) set is composed of the number of monthly tourist visits to Turkey according to the various nationalities. It has 103 variables/columns and 150 observations/rows.
 
 
+- Columns represent the countries or regions which tourists came from, and the rows show the dates, month by month. Within the context of the project, our purpose is to investigate the dataset on a large scale.
+---
 # Key Takeaways
+
+- Turkey’s incoming visitors with their nationalities data is analyzed.
+
+- Seasonality analysis and effects of terrorism, development level, visa policy, exchange rates, distance on number of tourists are examined.
+
+- Interesting results are found such as: 
+
+
+◦Visitors mostly prefer summer season and number of visitors has an increasing trend throughout years except 2016 the year terrorism data peaks with the coup attempt and 2020 the year COVID-19 epidemic spreads.  
+ 
+ 
+◦ HDI, an index indicating development level of a country, analysis shows Turkey hosts tourists more from developed countries.
+ 
+ 
+◦ Political issues also have an impact on number of tourist. While number of Russian tourists has an increasing trend till 2015, it starts to decrease suddenly in 2015. This is most probably because of retrograde relationship of Russia and Turkey after the Russian plane crash made by Turkey. Then, the number increases again with the normalization process at the end of 2016.
+
 
 
 
@@ -80,12 +102,13 @@ last10 <- bind_cols(means = last10_m, sums= last10_s, names= rownames(last10_m))
 
 - We analyzed which countries visited Turkey the most and the least, both in terms of total tourists and average tourists per month and the number of visitors by those countries. The top 10 countries that visited Turkey the most are given below:
 ```{r,fig.height=5, fig.width=10,fig.align = 'center', message=FALSE,echo=FALSE, warning=FALSE}
-top10  %>% ggplot(aes(x=names, y=means, fill=names)) + geom_col() +theme_minimal() + theme(legend.position = "None") 
+top10  %>% ggplot(aes(x=names, y=means, fill=names)) + geom_col() +theme_minimal() + theme(legend.position = "None")+labs(x="Country",y="Average Number of Tourists",title="Countries from which Tourists Come the Most") 
 ```
 ---
 - The top 10 countries that visited Turkey the least are given below:
 ```{r,fig.height=6, fig.width=10,fig.align = 'center', message=FALSE, warning=FALSE}
-last10 %>% ggplot(aes(x=names, y=means,fill=names)) + geom_col() +theme_minimal() +  theme(legend.position = "None") 
+last10 %>% ggplot(aes(x=names, y=means,fill=names)) + geom_col() +theme_minimal() +  theme(legend.position = "None",axis.text.x = element_text(angle = 45)) +
+  labs(x="Country",y="Average Number of Tourists",title="Countries from which Tourists Come the Least")
 ```
 ---
 ```{r most, message=FALSE,echo=FALSE,include=FALSE, warning=FALSE}
@@ -109,7 +132,7 @@ total_df <- raw_df %>% select("Date" | contains("Total"))
 
 - Continents the tourists came from the most.
 ```{r,fig.height=6, fig.width=10,fig.align = 'center',message=FALSE, warning=FALSE}
-total_df %>% pivot_longer(.,-Date) %>% ggplot(.,aes(x=Date,y=value,color=name)) + geom_line()
+total_df %>% pivot_longer(.,-Date) %>% ggplot(.,aes(x=Date,y=value,color=name)) + geom_line()+labs(x="Date", y="Number of Tourists",title="Number of Tourists by Continents",color="Continents")
 ```
 ---
 
@@ -134,14 +157,16 @@ plot(decomposed)
 ---
 - This is the original plot of the data:
 ```{r seosonality2,fig.height=6, fig.width=10,fig.align = 'center', message=FALSE, warning=FALSE}
-total_df %>% ggplot(aes(x=Date,y=`Grand Total`)) +geom_line() + theme_minimal() #put labels and stuff
+total_df %>% ggplot(aes(x=Date,y=`Grand Total`)) +geom_line() + theme_minimal()+
+  labs(title="Total Number of Tourists with Seasonality",y="Number of Tourists")
 ```
 ---
 - This is the deseasonalized version of the data:
 ```{r seosonality3,fig.height=6, fig.width=10,fig.align = 'center', message=FALSE, warning=FALSE}
 ts.stl <- stl(ts,"periodic") 
 ts.sa <- seasadj(ts.stl) 
-total_df %>% ggplot(aes(x=Date, y= ts.sa)) +geom_line() + theme_minimal() #put labels and stuff
+total_df %>% ggplot(aes(x=Date, y= ts.sa)) +geom_line() + theme_minimal()+
+  labs(title="Total Number of Tourists without Seasonality",y="Number of Tourists")
 ``` 
 
 ---
@@ -189,7 +214,7 @@ yearly_total_visits$Year<- as.Date(as.character(yearly_total_visits$Year), forma
 class(yearly_total_visits$Year)
 ```
 
-```{r,fig.height=5, fig.width=10,fig.align = 'center',message=FALSE,echo=FALSE, warning=FALSE}
+```{r,fig.height=4, fig.width=10,fig.align = 'center',message=FALSE,echo=FALSE, warning=FALSE}
 ggplot() + 
   geom_bar(mapping = aes(x = yearly_total_visits$Year, y = yearly_total_visits$total), stat = "identity", fill = "black") +
   geom_line(mapping = aes(x = number_of_events_year$Year, y = number_of_events_year$total*100000), size = 2, color = "blue") + 
@@ -199,8 +224,10 @@ ggplot() +
                                          labels = function(b) { paste0(b)})) + 
   theme(
     axis.title.y = element_text(color = "black"),
-    axis.title.y.right = element_text(color = "blue"))
+    axis.title.y.right = element_text(color = "blue"))+
+  labs(title="Average Number of Tourists with the Terrorism Level (yearly)")
 ```
+- As the graph illustrates, it is hard to say that there is no correlation between the number of terrorisms in Turkey and the number of tourists in Turkey. 
 
 ---
 # Relation Between Number of Visitors and Development Level of Their Countries 
@@ -288,10 +315,12 @@ joined_data_GDP_per_capita <- joined_data_GDP_per_capita %>%
          )
 ```
 - Average GDP per capita plot with respect to average yearly visitors, colored by GDP per capita level is given below.
-```{r,fig.height=6, fig.width=10,fig.align = 'center',warning=FALSE,message=FALSE}
+```{r,fig.height=5, fig.width=10,fig.align = 'center',warning=FALSE,message=FALSE}
 joined_data_GDP_per_capita %>%
   ggplot(aes(x=avg_2008to2018_yearly,y=avg_GDPperCap_2008to2018, color=GDP_per_capita_level),fig.align='center')+
-  geom_point()
+  geom_point()+
+  labs(x="2008-2018 yearly number of visitors average", y="2008-2018 average GDP per capita") +
+  scale_color_discrete(name="GDP per capita levels of countries")
 
 ```
 
@@ -303,7 +332,7 @@ GDP_per_capita_level_grouped <- joined_data_GDP_per_capita %>%
 ---
 - Pie chart for GDP per capita is given below.
 ```{r,fig.height=5, fig.width=10,fig.align = 'center'}
-ggplot(GDP_per_capita_level_grouped, aes(x="",y=sum,fill=GDP_per_capita_level))+geom_bar(stat="identity",width=1)+coord_polar("y")+labs(x="",y="sum")
+ggplot(GDP_per_capita_level_grouped, aes(x="",y=sum,fill=GDP_per_capita_level))+geom_bar(stat="identity",width=1)+coord_polar("y")+labs(x="",y="Total yearly average visitors") +scale_fill_discrete(name="GDP per capita levels of countries")
 ```
 - Top 5 countries whose citizens visited Turkey the most belong either high or low GDP per capita levels.
 - It is worth to mention that people whose countries belong to the medium category do not visit Turkey much, unlike high and low categories.     
@@ -343,23 +372,29 @@ joined_data_life_expectancy <- joined_data_life_expectancy %>%
                                         (avg_life_expectancy_2008to2018>=q2[4]&avg_life_expectancy_2008to2018<=q2[5])~"high" 
   )
   )
+joined_data_life_expectancy$life_expectancy_level <- factor(joined_data_life_expectancy$life_expectancy_level, levels = c("high", "medium","low","very low"))
 
 ```
 - The average life expectancy with respect to average yearly visitors, colored by life expectancy level of countries is given below.
-```{r,fig.height=6, fig.width=10,fig.align = 'center',warning=FALSE,message=FALSE}
+```{r,fig.height=5, fig.width=10,fig.align = 'center',warning=FALSE,message=FALSE}
 joined_data_life_expectancy %>%
   ggplot(aes(x=avg_2008to2018_yearly,y=avg_life_expectancy_2008to2018, color=life_expectancy_level)) +
-  geom_point()
+  geom_point()+
+  labs(x="2008-2018 yearly number of visitors average", y="2008-2018 average life expectancy") +
+  scale_color_discrete(name="Life expectancy levels of countries")
 
+```
+
+```{r,message=FALSE,echo=FALSE,include=FALSE,warning=FALSE}
 life_expectancy_level_grouped <- joined_data_life_expectancy %>%
   group_by(life_expectancy_level) %>%
   summarise(sum=sum(avg_2008to2018_yearly))
 ```
 ---
-- Unlike the pie chart for GDP per capita, life expectancy pie chart is not far from a equally divided pie.
+- Similarly we do not see many medium level countries in top countries, except Germany.Unlike the pie chart for GDP per capita, life expectancy pie chart is not far from a equally divided pie.
 ```{r,fig.height=6, fig.width=10,fig.align = 'center'}
 
-ggplot(life_expectancy_level_grouped, aes(x="",y=sum,fill=life_expectancy_level))+geom_bar(stat="identity",width=1)+coord_polar("y")+labs(x="",y="sum")
+ggplot(life_expectancy_level_grouped, aes(x="",y=sum,fill=life_expectancy_level))+geom_bar(stat="identity",width=1)+coord_polar("y")+labs(x="",y="Total yearly average visitors")+scale_fill_discrete(name="Life expectancy levels of countries")
 ```
 
 ---
@@ -396,12 +431,16 @@ joined_data_HDI <- years_total %>%
                              avg_HDI_2008to2018<0.55~"low"
                              )
          )
+joined_data_HDI$HDI_level <- factor(joined_data_HDI$HDI_level, levels = c("very high","high","medium","low"))
+
 ```
 
-```{r,fig.height=6, fig.width=10,fig.align = 'center'}
+```{r,fig.height=5, fig.width=10,fig.align = 'center'}
 joined_data_HDI %>%
   ggplot(aes(x=avg_2008to2018_yearly,y=avg_HDI_2008to2018, color=HDI_level)) +
-  geom_point()
+  geom_point()+
+  labs(x="2008-2018 yearly number of visitors average", y="2008-2018 average HDI") +
+  scale_color_discrete(name="HDI levels of countries")
 ```
 ---
 ```{r,message=FALSE,warning=FALSE,include=FALSE}
@@ -414,7 +453,8 @@ HDI_level_grouped <- joined_data_HDI %>%
 
 - HDI level pie chart is given below.
 ```{r,fig.height=6, fig.width=10,fig.align = 'center'}
-ggplot(HDI_level_grouped, aes(x="",y=sum,fill=HDI_level))+geom_bar(stat="identity",width=1)+coord_polar("y")+labs(x="",y="sum")
+ggplot(HDI_level_grouped, aes(x="",y=sum,fill=HDI_level))+geom_bar(stat="identity",width=1)+coord_polar("y")+labs(x="",y="Total yearly average visitors")+scale_fill_discrete(name="HDI levels of countries (by quantile)")
+
 
 ```
 ---
@@ -444,7 +484,8 @@ joined_data_HDI %>%
 ---
 - HDI  level quantile pie chart is given below.
 ```{r,fig.height=6, fig.width=10,fig.align = 'center'}
-ggplot(HDI_level_by_quantile_grouped, aes(x="",y=sum,fill=HDI_level_by_quantile))+geom_bar(stat="identity",width=1)+coord_polar("y")+labs(x="",y="sum")
+ggplot(HDI_level_by_quantile_grouped, aes(x="",y=sum,fill=HDI_level_by_quantile))+geom_bar(stat="identity",width=1)+coord_polar("y")+labs(x="",y="Total yearly average visitors")+scale_fill_discrete(name="HDI levels of countries (by quantile)")
+
 
 ```
 ---
@@ -522,8 +563,10 @@ tail(ranked_final,10)
 ggplot(ranked_final,aes(x=Country,y=total,color=factor(Visa)))+
   geom_point()+
   scale_y_continuous(labels = unit_format(unit = "M", scale = 1e-6))+
-  theme(axis.text.x = element_text(angle = 80, vjust = .5)) 
+  theme(axis.text.x = element_text(angle = 80, vjust = .5))+
+  labs(y="Total Number of Tourists (yearly)", title="Number of Tourists vs Countries with Turkey's Visa Policy", color="Visa Policy")
 ```
+
 ---
 # Analysis of Exchange Rates and Visitors 
 - In this part, an analysis of change of exchange rates ,and whether it has salient effects on the number of tourists is conducted. 
@@ -610,7 +653,7 @@ ggplot3<-joined_data %>%
     theme(legend.position = "none")+
     xlim(min(joined_data$Date),max(joined_data$Date))+
     facet_wrap(~name,scales="free")
-  ggplotly(ggplot2,width=700, height=300)
+  ggplotly(ggplot3,width=700, height=300)
 ```
 - Similar seasonality can be observed in the number of USA visitors as in Europe. However, the month where peak value in the number of visitors is seen slightly differs from European Tourists, and also between the years.
 ---
@@ -663,13 +706,35 @@ summary(fit)
 ```
 
 ```{r,fig.height=6, fig.width=10, echo=FALSE}
-fit%>%forecast()%>%autoplot()+xlab("Date")+ylab("Number of Visitors from Germany")
+fit%>%forecast()%>%autoplot()+
+  labs(x="Date",y="Number of Visitors from Germany",title="Forecast of Number of Visitors from Germany")
 ```
 
 ---
+# Shiny App
+
+- Below you can see an image of our Shiny app. The link is provided in our group [Progress Journal](https://pjournal.github.io/boun01g-biktik-r-tik/).
+```{r, echo=FALSE}
+knitr::include_graphics("Shiny.png")
+```
+---
 
 # Conclusion
+Turkey is a country having high potential to attract tourists especially during summer season thanks to its nature, cultural and historical heritage, long coastline with beautiful beaches. Preference of tourists can be Turkey because of the touristic potential or not due to some other reasons. 
 
+In this analysis, number of tourists is examined in detail with different aspects such as:
+
+- Terrorism in Turkey 
+
+- Development of the countries from which tourists come 
+
+- Visa policy of Turkey 
+
+- Exchange rates
+---
+- Distance between Turkey and the other countries:
+ 
+When calculating correlation between distance and number of tourists, we see there is not a big impact of air distance on number of tourists because of low correlation result. Nevertheless, they have a negative relationship since all the values are negative. The reason why air distance does not affect much might be that transportation opportunities play bigger role today than air distance. 
 
 
 ---
@@ -683,6 +748,7 @@ fit%>%forecast()%>%autoplot()+xlab("Date")+ylab("Number of Visitors from Germany
 - [Terrorism data](https://www.kaggle.com/behic1/terrorism-in-turkey)
 - [Visa data](https://gocmenburo.com/turkiyenin-vize-istedigi-ulkeler)
 - [Country Development](https://en.wikipedia.org/wiki/Developed_country)
+- [Datacamp, Building Web Applications with Shiny in R](https://learn.datacamp.com/courses/building-web-applications-with-shiny-in-r) 
 
 
 
