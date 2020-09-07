@@ -319,7 +319,8 @@ joined_data_GDP_per_capita <- joined_data_GDP_per_capita %>%
 joined_data_GDP_per_capita %>%
   ggplot(aes(x=avg_2008to2018_yearly,y=avg_GDPperCap_2008to2018, color=GDP_per_capita_level),fig.align='center')+
   geom_point()+
-  labs(x="2008-2018 yearly number of visitors average", y="2008-2018 average GDP per capita") +
+  labs(x="2008-2018 yearly number of visitors average", y="2008-2018 average GDP per capita", 
+       title="Average GDP per Capita") +
   scale_color_discrete(name="GDP per capita levels of countries")
 
 ```
@@ -332,7 +333,7 @@ GDP_per_capita_level_grouped <- joined_data_GDP_per_capita %>%
 ---
 - Pie chart for GDP per capita is given below.
 ```{r,fig.height=5, fig.width=10,fig.align = 'center'}
-ggplot(GDP_per_capita_level_grouped, aes(x="",y=sum,fill=GDP_per_capita_level))+geom_bar(stat="identity",width=1)+coord_polar("y")+labs(x="",y="Total yearly average visitors") +scale_fill_discrete(name="GDP per capita levels of countries")
+ggplot(GDP_per_capita_level_grouped, aes(x="",y=sum,fill=GDP_per_capita_level))+geom_bar(stat="identity",width=1)+coord_polar("y")+labs(x="",y="Total yearly average visitors",title="GDP per Capita Level") +scale_fill_discrete(name="GDP per capita levels of countries")
 ```
 - Top 5 countries whose citizens visited Turkey the most belong either high or low GDP per capita levels.
 - It is worth to mention that people whose countries belong to the medium category do not visit Turkey much, unlike high and low categories.     
@@ -380,7 +381,7 @@ joined_data_life_expectancy$life_expectancy_level <- factor(joined_data_life_exp
 joined_data_life_expectancy %>%
   ggplot(aes(x=avg_2008to2018_yearly,y=avg_life_expectancy_2008to2018, color=life_expectancy_level)) +
   geom_point()+
-  labs(x="2008-2018 yearly number of visitors average", y="2008-2018 average life expectancy") +
+  labs(x="2008-2018 yearly number of visitors average", y="2008-2018 average life expectancy",title="Average Life Expectancy") +
   scale_color_discrete(name="Life expectancy levels of countries")
 
 ```
@@ -394,7 +395,7 @@ life_expectancy_level_grouped <- joined_data_life_expectancy %>%
 - Similarly we do not see many medium level countries in top countries, except Germany. Unlike the pie chart for GDP per capita, life expectancy pie chart is not far from a equally divided pie.
 ```{r,fig.height=6, fig.width=10,fig.align = 'center'}
 
-ggplot(life_expectancy_level_grouped, aes(x="",y=sum,fill=life_expectancy_level))+geom_bar(stat="identity",width=1)+coord_polar("y")+labs(x="",y="Total yearly average visitors")+scale_fill_discrete(name="Life expectancy levels of countries")
+ggplot(life_expectancy_level_grouped, aes(x="",y=sum,fill=life_expectancy_level))+geom_bar(stat="identity",width=1)+coord_polar("y")+labs(x="",y="Total yearly average visitors",title="Life Expectancy Level")+scale_fill_discrete(name="Life expectancy levels of countries")
 ```
 
 ---
@@ -458,15 +459,19 @@ HDI_level_by_quantile_grouped <- joined_data_HDI %>%
 
 ```
 
-```{r,fig.height=6, fig.width=10,fig.align = 'center'}
+```{r,fig.height=7, fig.width=10,fig.align = 'center',echo=FALSE}
 joined_data_HDI %>%
   ggplot(aes(x=avg_2008to2018_yearly,y=avg_HDI_2008to2018, color=HDI_level_by_quantile)) +
-  geom_point()
+  geom_point()+
+  labs(x="2008-2018 yearly number of visitors average", y="2008-2018 average HDI",
+       title="Average HDI") +
+  scale_color_discrete(name="HDI levels of countries (by quantile)")
 ```
 ---
 - HDI  level quantile pie chart is given below.
 ```{r,fig.height=6, fig.width=10,fig.align = 'center'}
-ggplot(HDI_level_by_quantile_grouped, aes(x="",y=sum,fill=HDI_level_by_quantile))+geom_bar(stat="identity",width=1)+coord_polar("y")+labs(x="",y="Total yearly average visitors")+scale_fill_discrete(name="HDI levels of countries (by quantile)")
+ggplot(HDI_level_by_quantile_grouped, aes(x="",y=sum,fill=HDI_level_by_quantile))+geom_bar(stat="identity",width=1)+coord_polar("y")+labs(x="",y="Total yearly average visitors", title="HDI Level by Quantile")+
+  scale_fill_discrete(name="HDI levels of countries (by quantile)")
 
 
 ```
@@ -643,7 +648,6 @@ ggplot3<-joined_data %>%
 - Distance (between Turkey and specified country) vector is created for each respectively to determine correlation between distance and number of tourists per year.
 ```{r, message=FALSE,echo=FALSE,include=FALSE,warning=FALSE }
 cor_data<-c()
-
 for (i in 2008:2020){
 data<-raw_data%>%
   select(-c('Haymatlos', 'Grand Total'))%>%
@@ -653,20 +657,15 @@ data<-raw_data%>%
           values_to = "values")%>%
   group_by(names)%>%
   summarise(avg=mean(values))
-
 data1<-data[-c(2,4,7,8,15,24,25,27,28,36,37), ] 
-
-
-
 distance<-c(10066,2350,13004,1295,12551,1977,1080,2500,2045,5389,1646,2709,1538,10708,915,1979,3189,6077,2637,
             9930,867,2314,3760,8849,2843,2793,7770,792,4566,1744,2682,3301,1048,1802,3596,3322,834,2896,2353,1905,
             4429,8686,8630,1386,2136,2818,3376,410,11286,1249,1575,2130,2063,2000,579,2563,1506,1038,8756,1843,
             11801,1413,1054,3068,12427,2451,3337,1852,3674,1129,1873,13348,8105,1363,1638,1811,2604,518,1931,
             3091,6872,2381,2115,1137,894,10388,2884,16624,1122)
-
 cor_data <- c(cor_data, cor(data1$avg,distance))
-
 }
+
 ```
 
 ```{r, fig.height=3, fig.width=10,message=FALSE,echo=FALSE, warning=FALSE}
@@ -677,6 +676,21 @@ ggplot(yearly_correlation,aes(x=Years, y=Correlation))+geom_col()+ylim(-1,1)+the
 
 ```
 - All the values lay below the zero line, which means there is a negative relationship.  However, it is clear that distance has no a big impact on number of tourists because absolute value of correlation values is almost zero.
+---
+- As we see in the plot, there is a decrease for all the countries in 2016, which arises most probably from Turkey’s deteriorating image due to the coup attempt. However, there is also a special case for number of Russian tourists which starts to decrease in 2015 not 2016 as in others. The reason is political tension between Russia and Turkey after Russian plane crash made by Turkey. 
+```{r,fig.height=6, fig.width=10,message=FALSE,echo=FALSE, warning=FALSE}
+raw_data %>%
+  select(c('Bulgaria', 'France','Georgia','Germany','Greece','Iran','Netherlands','Russia','Ukraine',
+           'United Kingdom',Date))%>%
+  pivot_longer(.,cols = -Date,
+             names_to = "Country", 
+             values_to = "Number of Tourists")%>%
+  ggplot(.,aes(x=Date,y=`Number of Tourists`,color=Country))+geom_line()+labs(title="Countries from which Tourists Come the Most",subtitle = "Line Plot Version")
+```
+
+
+
+
 ---
 # Forecast Plot for Germany
 - By using `auto.arima` function and data of previous 150 months, the number of visitors from Germany are forecasted and plotted.
@@ -706,15 +720,20 @@ Turkey is a country having high potential to attract tourists especially during 
 
 In this analysis, number of tourists is examined in detail with different aspects such as:
 
-- Terrorism in Turkey 
+**Terrorism in Turkey**
+With respect to the annual analysis of this correlation, an increase in the number of terrorism events results in a decrease in the number of touristic visits. Although the terrorism data frame only gives information until 2017, data visualization makes it clear to observe the negative correlation between these two subjects.
 
-- Development of the countries from which tourists come 
+**Development of the countries from which tourists come**
+Turkey attracts countries mostly from 1st and 3rd quantile of development levels measured by GDP per capita and human development index.
 
-- Visa policy of Turkey 
-
-- Exchange rates
+**Visa policy of Turkey** 
+Even though many countries can enter to Turkey without visa, the others visit much more than the visa-free ones. So, the need for visa doesn’t have a significant effect on the number of tourists to Turkey.
 ---
-- Distance between Turkey and the other countries:
+
+**Exchange rates**
+Although total number of tourists from Europe has an increasing trend after a significant decrease in 2016, there is still not enough evidence to infer that the increase in tourists is due to the increase in Euro/tl currency. Similar analysis can be made in the number of USA visitors as in Europe.
+
+**Distance between Turkey and the other countries**
  
 When calculating correlation between distance and number of tourists, we see there is not a big impact of air distance on number of tourists because of low correlation result. Nevertheless, they have a negative relationship since all the values are negative. The reason why air distance does not affect much might be that transportation opportunities play bigger role today than air distance. 
 
@@ -729,6 +748,7 @@ When calculating correlation between distance and number of tourists, we see the
 - [Human Development Index (HDI) data](http://hdr.undp.org/en/data)
 - [Terrorism data](https://www.kaggle.com/behic1/terrorism-in-turkey)
 - [Visa data](https://gocmenburo.com/turkiyenin-vize-istedigi-ulkeler)
+- [Distance Data](https://tr.distance.to/)
 - [Country Development](https://en.wikipedia.org/wiki/Developed_country)
 - [Datacamp, Building Web Applications with Shiny in R](https://learn.datacamp.com/courses/building-web-applications-with-shiny-in-r) 
 
