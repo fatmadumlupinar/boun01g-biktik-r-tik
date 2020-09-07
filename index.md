@@ -17,10 +17,11 @@
 
 ## Group Project
 - [Project Proposal ](https://pjournal.github.io/boun01g-biktik-r-tik/Project-Proposal.html)
-- [Exploratory Data Analysis](https://pjournal.github.io/boun01g-biktik-r-tik/analysis/final-markdown.html)
+- [Exploratory Data Analysis](https://pjournal.github.io/boun01g-biktik-r-tik/analysis/GroupProject_FinalReport.html)
 - [Xaringan Presentation](Presentation/Presentation.html)
 - [Shiny App](https://irmakdai.shinyapps.io/project-shiny/)
 - [Shiny App Code](https://pjournal.github.io/boun01g-biktik-r-tik/shiny.html)
+- [Animated Plot](https://raw.githubusercontent.com/pjournal/boun01g-biktik-r-tik/gh-pages/animated_plot_visitors/animatedplot.gif)
 
 ## Group Assignment: New York City Airbnb Open Data - Kaggle
 - Data Source : [NYC Airbnb Open Data](https://www.kaggle.com/dgomonov/new-york-city-airbnb-open-data)
@@ -29,6 +30,7 @@
 
 ## Bonus Assignment: reticulate Package Tutorial
 - Proposal 
+
 <br> Selected package to introduce is [reticulate](https://cran.r-project.org/web/packages/reticulate/index.html).
 <br> Short description and functions in the package are available [here](https://www.rdocumentation.org/packages/reticulate/versions/1.16).
 
