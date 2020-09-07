@@ -124,12 +124,13 @@ ggplot(monthly_sum) + geom_col(aes(x=month,y=sum)) + labs(title = "Visitors by M
 
 ---
 - The effect of seasonality can be seen below.
-```{r seosonality,fig.height=6, fig.width=10,fig.align = 'center', message=FALSE, warning=FALSE}
+```{r seosonality,fig.height=6, fig.width=10,fig.align = 'center',echo=FALSE, message=FALSE, warning=FALSE}
 ts <- ts(total_df$`Grand Total`, frequency = 12, start = 2008) 
 decomposed <- decompose(ts, type="additive")
 plot(decomposed)
-```
 
+```
+- The decomposed plot shows us there is an increased trend, however in 2016, there is a significant drop in the number of tourists, which can be attributed to the coup attempt during that summer.
 ---
 - This is the original plot of the data:
 ```{r seosonality2,fig.height=6, fig.width=10,fig.align = 'center', message=FALSE, warning=FALSE}
@@ -145,9 +146,10 @@ total_df %>% ggplot(aes(x=Date, y= ts.sa)) +geom_line() + theme_minimal() #put l
 
 ---
 - The effect of Covid-19 can be seen the tourist data in 2020.
-```{r seosonality4,fig.height=6, fig.width=10,fig.align = 'center', message=FALSE, warning=FALSE}
-seasonplot(ts.sa, 12, col=rainbow(13), season.labels=TRUE, year.labels=TRUE, main="Seasonal Visitors") #Make these clearer?
+```{r seosonality4,fig.height=6, fig.width=10,fig.align = 'center',echo=FALSE, message=FALSE, warning=FALSE}
+seasonplot(ts.sa, 12, col=rainbow(13), season.labels=TRUE, year.labels=TRUE, main="Seasonal Visitors") 
 ```
+- We can see that the tourist data in 2020 is very different than the rest and downwards trending due to Covid-19.
 ---
 #Relation Between Number of Visitors and Terrorism in Turkey
 - The plot with two scales represent the correlation between the number of tourists and terrorism statistics.
@@ -303,6 +305,7 @@ GDP_per_capita_level_grouped <- joined_data_GDP_per_capita %>%
 ```{r,fig.height=5, fig.width=10,fig.align = 'center'}
 ggplot(GDP_per_capita_level_grouped, aes(x="",y=sum,fill=GDP_per_capita_level))+geom_bar(stat="identity",width=1)+coord_polar("y")+labs(x="",y="sum")
 ```
+- Top 5 countries whose citizens visited Turkey the most belong either high or low GDP per capita levels.
 - It is worth to mention that people whose countries belong to the medium category do not visit Turkey much, unlike high and low categories.     
 
 ```{r,message=FALSE,echo=FALSE,include=FALSE,warning=FALSE}
@@ -555,7 +558,7 @@ euro_dolar_2<-euro_dolar_tidy%>%
   pivot_longer(!Date,names_to="exchange_type",values_to="rate")
 
 ```
-### Exchange Rate Analysis
+**Exchange Rate Analysis**
 - The change in the exchange rates of both EURO and DOLLAR is examined from the first month of 2008 untill sixth month of 2020.
 ```{r,fig.height=4, fig.width=10,plotting_exchange_rate, fig.align = 'center',echo=FALSE, message=FALSE, warning=FALSE}
 #ploting line graph to see exchange rate by time
@@ -565,8 +568,9 @@ ggplot<-ggplot(euro_dolar_2,aes(Date,rate,color=exchange_type))+
   theme_minimal()
 ggplotly(ggplot)
 ```
+- From the graph, it can be observed that, within the given time frame, euro and dollar tend to increase correlatedly, euro being slightly higher than dollar. Thus, Turkish Lira has been in a trend of losing value for years.
 ---
-### Number of Visitor and Exchange Rate Comparison
+**Number of Visitor and Exchange Rate Comparison**
 - In this part, total number of visitors from Europe and USA, and the change of exchange rate in Euro and Dollar is examined to better understand if a correlation and/or trend exist between the two. 
 ```{r joining two datasets,message=FALSE,echo=FALSE,include=FALSE,warning=FALSE }
 usa_and_total_europe<-mil[1:150,c("Date","United States","Total Europe")]
@@ -580,7 +584,7 @@ joined_data<-usa_and_total_europe %>%
 head(joined_data)
 ```
 
-```{r,fig.height=6, fig.width=10,Exchange_rate_Total_visitor_comparison_Europe, echo=FALSE,warning=FALSE, fig.align = 'center', message=FALSE, warning=FALSE}
+```{r,fig.height=5, fig.width=10,Exchange_rate_Total_visitor_comparison_Europe, echo=FALSE,warning=FALSE, fig.align = 'center', message=FALSE, warning=FALSE}
 ggplot2<-joined_data %>%
     select(c(Date,euro_tl_exchange_rate,`Total Europe`)) %>%
     slice(-1) %>%
@@ -591,9 +595,11 @@ ggplot2<-joined_data %>%
     facet_wrap(~name,scales="free")
   ggplotly(ggplot2)
 ```
+
+- By examining both of the graphs, it can be observed that total number of tourists from Europe to Turkey have an oscillating shape, which means the change in the number of visitors is seasonal( most visitors can be observed during summer months) rather than being correlated with the exchange rate of Euro/TL.
 ---
 - Visualization of total visitors from USA and Dollar/TL exchange rate is given below.
-```{r,fig.height=7, fig.width=10, Exchange_rate_Total_visitor_comparison_USA, echo=FALSE, fig.align = 'center', message=FALSE, warning=FALSE}
+```{r,fig.height=6, fig.width=10, Exchange_rate_Total_visitor_comparison_USA, echo=FALSE, fig.align = 'center', message=FALSE, warning=FALSE}
 ggplot3<-joined_data %>%
     select(c(Date,dollar_tl_exchange_rate,`United States`)) %>%
     slice(-1) %>%
@@ -604,6 +610,7 @@ ggplot3<-joined_data %>%
     facet_wrap(~name,scales="free")
   ggplotly(ggplot3)
 ```
+- Similar seasonality can be observed in the number of USA visitors as in Europe. However, the month where peak value in the number of visitors is seen slightly differs from European Tourists, and also between the years.
 ---
 # The Effect of Distance Between Turkey and the Other Countries
 - Distance (between Turkey and specified country) vector is created for each respectively to determine correlation between distance and number of tourists per year.
@@ -635,14 +642,14 @@ cor_data <- c(cor_data, cor(data1$avg,distance))
 }
 ```
 
-```{r, fig.height=5, fig.width=10,message=FALSE,echo=FALSE, warning=FALSE}
+```{r, fig.height=3, fig.width=10,message=FALSE,echo=FALSE, warning=FALSE}
 years<-c(2008:2020)
 yearly_correlation<-data.frame(Years=years,Correlation=cor_data)
 ggplot(yearly_correlation,aes(x=Years, y=Correlation))+geom_col()+ylim(-1,1)+theme_light()+
   scale_x_continuous(breaks = seq(2008, 2020, by = 1))+theme(axis.text.x=element_text(angle = 90))
 
 ```
-
+- All the values lay below the zero line, which means there is a negative relationship.  However, it is clear that distance has no a big impact on number of tourists because absolute value of correlation values is almost zero.
 ---
 # Forecast Plot for Germany
 - By using `auto.arima` function and data of previous 150 months, the number of visitors from Germany are forecasted and plotted.
