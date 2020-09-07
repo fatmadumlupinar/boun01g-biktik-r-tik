@@ -30,6 +30,7 @@
 
 ## Bonus Assignment: reticulate Package Tutorial
 - Proposal 
+
 <br> Selected package to introduce is [reticulate](https://cran.r-project.org/web/packages/reticulate/index.html).
 <br> Short description and functions in the package are available [here](https://www.rdocumentation.org/packages/reticulate/versions/1.16).
 
