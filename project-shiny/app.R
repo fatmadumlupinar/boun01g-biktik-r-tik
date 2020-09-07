@@ -7,8 +7,6 @@ if(length(pti)>0){
 library(shiny)
 library(tidyverse)
 library(leaflet)
-library(rsconnect)
-
 
 
 #reading and preparing data
