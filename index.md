@@ -17,7 +17,7 @@
 
 ## Group Project
 - [Project Proposal ](https://pjournal.github.io/boun01g-biktik-r-tik/Project-Proposal.html)
-- [Exploratory Data Analysis](https://pjournal.github.io/boun01g-biktik-r-tik/analysis/GroupProject_FinalReport.html)
+- [Exploratory Data Analysis](https://pjournal.github.io/boun01g-biktik-r-tik/analysis/GroupProject_Report_FinalVersion.html)
 - [Xaringan Presentation](Presentation/Presentation.html)
 - [Shiny App](https://irmakdai.shinyapps.io/project-shiny/)
 - [Shiny App Code](https://pjournal.github.io/boun01g-biktik-r-tik/shiny.html)
