@@ -8,7 +8,7 @@ library(shiny)
 library(tidyverse)
 library(leaflet)
 library(rsconnect)
-rsconnect::deployApp("C:/Users/Asus/Documents/GitHub/boun01g-biktik-r-tik/project - shiny")
+
 
 
 #reading and preparing data
