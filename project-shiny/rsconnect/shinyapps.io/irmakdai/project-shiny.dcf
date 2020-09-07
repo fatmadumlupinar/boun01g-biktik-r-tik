@@ -1,0 +1,12 @@
+name: project-shiny
+title: project-shiny
+username:
+account: irmakdai
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 2765772
+bundleId: 3603310
+url: https://irmakdai.shinyapps.io/project-shiny/
+when: 1599503489.64965
+asMultiple: FALSE
+asStatic: FALSE
