@@ -21,6 +21,7 @@
 - [Xaringan Presentation](Presentation/Presentation.html)
 - [Shiny App](https://irmakdai.shinyapps.io/project-shiny/)
 - [Shiny App Code](https://pjournal.github.io/boun01g-biktik-r-tik/shiny.html)
+- [Animated Plot](https://raw.githubusercontent.com/pjournal/boun01g-biktik-r-tik/gh-pages/animated_plot_visitors/animatedplot.gif)
 
 ## Group Assignment: New York City Airbnb Open Data - Kaggle
 - Data Source : [NYC Airbnb Open Data](https://www.kaggle.com/dgomonov/new-york-city-airbnb-open-data)
