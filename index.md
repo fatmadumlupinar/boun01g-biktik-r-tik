@@ -18,7 +18,7 @@
 ## Group Project
 - [Project Proposal ](https://pjournal.github.io/boun01g-biktik-r-tik/Project-Proposal.html)
 - [Exploratory Data Analysis](https://pjournal.github.io/boun01g-biktik-r-tik/analysis/final-markdown.html)
--[Xaringan Presentation](Presentation/Presentation.html)
+- [Xaringan Presentation](Presentation/Presentation.html)
 
 ## Group Assignment: New York City Airbnb Open Data - Kaggle
 - Data Source : [NYC Airbnb Open Data](https://www.kaggle.com/dgomonov/new-york-city-airbnb-open-data)
