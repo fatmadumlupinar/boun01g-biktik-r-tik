@@ -391,7 +391,7 @@ life_expectancy_level_grouped <- joined_data_life_expectancy %>%
   summarise(sum=sum(avg_2008to2018_yearly))
 ```
 ---
-- Similarly we do not see many medium level countries in top countries, except Germany.Unlike the pie chart for GDP per capita, life expectancy pie chart is not far from a equally divided pie.
+- Similarly we do not see many medium level countries in top countries, except Germany. Unlike the pie chart for GDP per capita, life expectancy pie chart is not far from a equally divided pie.
 ```{r,fig.height=6, fig.width=10,fig.align = 'center'}
 
 ggplot(life_expectancy_level_grouped, aes(x="",y=sum,fill=life_expectancy_level))+geom_bar(stat="identity",width=1)+coord_polar("y")+labs(x="",y="Total yearly average visitors")+scale_fill_discrete(name="Life expectancy levels of countries")
@@ -415,8 +415,6 @@ HDI_data <- as.data.frame(HDI_data)
 
 ```
 
-- We also classified countries by their Human Development Index (HDI) into 4 categories: "very high", "high", "medium" and "low" 
-(source: <https://en.wikipedia.org/wiki/Developed_country> )
 ```{r,message=FALSE,echo=FALSE,include=FALSE,warning=FALSE}
 colnames(HDI_data)[2:12] <- paste0("HDI_", colnames(HDI_data)[2:12])
 
@@ -435,14 +433,6 @@ joined_data_HDI$HDI_level <- factor(joined_data_HDI$HDI_level, levels = c("very 
 
 ```
 
-```{r,fig.height=5, fig.width=10,fig.align = 'center'}
-joined_data_HDI %>%
-  ggplot(aes(x=avg_2008to2018_yearly,y=avg_HDI_2008to2018, color=HDI_level)) +
-  geom_point()+
-  labs(x="2008-2018 yearly number of visitors average", y="2008-2018 average HDI") +
-  scale_color_discrete(name="HDI levels of countries")
-```
----
 ```{r,message=FALSE,warning=FALSE,include=FALSE}
 
 HDI_level_grouped <- joined_data_HDI %>%
@@ -450,15 +440,7 @@ HDI_level_grouped <- joined_data_HDI %>%
   summarise(sum=sum(avg_2008to2018_yearly))
 
 ```
-
-- HDI level pie chart is given below.
-```{r,fig.height=6, fig.width=10,fig.align = 'center'}
-ggplot(HDI_level_grouped, aes(x="",y=sum,fill=HDI_level))+geom_bar(stat="identity",width=1)+coord_polar("y")+labs(x="",y="Total yearly average visitors")+scale_fill_discrete(name="HDI levels of countries (by quantile)")
-
-
-```
----
-- Besides given levels, we also wanted to analyze HDI levels by quantile, like we did with other metrics.
+- We also wanted to analyze HDI levels by quantile, like we did with other metrics.
 ```{r, message=FALSE,warning=FALSE,include=FALSE}
 q3 <- quantile(joined_data_HDI$avg_HDI_2008to2018, na.rm = TRUE)
 
@@ -713,7 +695,7 @@ fit%>%forecast()%>%autoplot()+
 ---
 # Shiny App
 
-- Below you can see an image of our Shiny app. The link is provided in our group [Progress Journal](https://pjournal.github.io/boun01g-biktik-r-tik/).
+- Below you can see an image of our Shiny app. The link of the Shiny app is [here](https://irmakdai.shinyapps.io/project-shiny/).
 ```{r, echo=FALSE}
 knitr::include_graphics("Shiny.png")
 ```
