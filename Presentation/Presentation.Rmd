@@ -591,9 +591,10 @@ ggplot2<-joined_data %>%
     pivot_longer(!Date)%>%
     ggplot(.,aes(x=Date,y=value,color=name))+
     geom_line()+
+    theme(legend.position = "none")+
     xlim(min(joined_data$Date),max(joined_data$Date))+
     facet_wrap(~name,scales="free")
-  ggplotly(ggplot2)
+  ggplotly(ggplot2,width=700, height=300)
 ```
 
 - By examining both of the graphs, it can be observed that total number of tourists from Europe to Turkey have an oscillating shape, which means the change in the number of visitors is seasonal( most visitors can be observed during summer months) rather than being correlated with the exchange rate of Euro/TL.
@@ -606,9 +607,10 @@ ggplot3<-joined_data %>%
     pivot_longer(!Date)%>%
     ggplot(.,aes(x=Date,y=value,color=name))+
     geom_line()+
+    theme(legend.position = "none")+
     xlim(min(joined_data$Date),max(joined_data$Date))+
     facet_wrap(~name,scales="free")
-  ggplotly(ggplot3)
+  ggplotly(ggplot2,width=700, height=300)
 ```
 - Similar seasonality can be observed in the number of USA visitors as in Europe. However, the month where peak value in the number of visitors is seen slightly differs from European Tourists, and also between the years.
 ---
