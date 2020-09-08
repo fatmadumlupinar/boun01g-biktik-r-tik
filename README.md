@@ -4,7 +4,7 @@ This is group biktik-r-tik's  [Progress Journal website](https://pjournal.github
 
 [Project Proposal](https://pjournal.github.io/boun01g-biktik-r-tik/Project-Proposal.html)
 
-[Project Exploratory Data Analysis](https://pjournal.github.io/boun01g-biktik-r-tik/analysis/final-markdown.html)
+[Project Exploratory Data Analysis](https://pjournal.github.io/boun01g-biktik-r-tik/analysis/GroupProject_Report_FinalVersion.html)
 # Group Members and Personal Progress Journals
 - [Alican Yılmaz](https://github.com/pjournal/boun01-alicanylmz)
 - [Egecan Esen](https://github.com/pjournal/boun01-egc-boun)
