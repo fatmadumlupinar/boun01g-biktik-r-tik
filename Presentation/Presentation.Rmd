@@ -751,7 +751,7 @@ When calculating correlation between distance and number of tourists, we see the
 - [Distance Data](https://tr.distance.to/)
 - [Country Development](https://en.wikipedia.org/wiki/Developed_country)
 - [Datacamp, Building Web Applications with Shiny in R](https://learn.datacamp.com/courses/building-web-applications-with-shiny-in-r) 
-
+- [Create Trending Animated Bar Charts](https://towardsdatascience.com/create-animated-bar-charts-using-r-31d09e5841da)
 
 
 
