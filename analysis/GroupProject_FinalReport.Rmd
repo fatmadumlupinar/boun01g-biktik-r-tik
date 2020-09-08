@@ -787,7 +787,7 @@ fit%>%forecast()%>%autoplot()+
 - [Visa data](https://gocmenburo.com/turkiyenin-vize-istedigi-ulkeler)
 - [Country Development](https://en.wikipedia.org/wiki/Developed_country)
 - [Shiny Course: Building Web Applications with Shiny in R](https://learn.datacamp.com/courses/building-web-applications-with-shiny-in-r)
-
+- [Create Trending Animated Bar Charts](https://towardsdatascience.com/create-animated-bar-charts-using-r-31d09e5841da)
 
 
 
