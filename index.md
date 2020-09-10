@@ -34,7 +34,7 @@
 <br> Short description and functions in the package are available [here](https://www.rdocumentation.org/packages/reticulate/versions/1.16).
 
 - Written tutorial using RMarkdown
-- Video tutorial of presentation
+- [Video tutorial of presentation](https://www.youtube.com/watch?v=KZRfpTQ07i4&feature=youtu.be&ab_channel=T%C3%BCmayK%C4%B1r)
 
 
 
