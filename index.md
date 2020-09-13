@@ -33,7 +33,7 @@
 <br> Selected package to introduce is [reticulate](https://cran.r-project.org/web/packages/reticulate/index.html).
 <br> Short description and functions in the package are available [here](https://www.rdocumentation.org/packages/reticulate/versions/1.16).
 
-- [Written tutorial using RMarkdown](https://pjournal.github.io/boun01g-biktik-r-tik/reticulate.html)
+- [Written tutorial using RMarkdown](https://pjournal.github.io/boun01g-biktik-r-tik/Reticulate.html)
 - [Video tutorial of presentation](https://www.youtube.com/watch?v=KZRfpTQ07i4&feature=youtu.be&ab_channel=T%C3%BCmayK%C4%B1r)
 
 
