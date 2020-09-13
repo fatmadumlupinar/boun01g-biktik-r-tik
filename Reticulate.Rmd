@@ -1,0 +1,193 @@
+---
+title: "Package Tutorial - Reticulate"
+author: "Bıktık R'tık"
+date: "9/13/2020"
+output: html_document
+---
+
+This is a tutorial for the package reticulate.
+Reticulate offers the ability to run Python code directly from R. It is a powerful package which can translate data between R and Python to allow for almost seamlessly integration between the two languages. While this is not the first package of this type, the ease of use and available features make it very useful.
+
+What you can do with this package includes but not limited to:
+Calling Python in R
+Translation between R and Python objects
+Using different versions of Python by creating virtual environments
+
+Reticulate does this by embedding a Python session in R.
+
+To get started, install the reticulate package:
+```{r install}
+pti <- c("reticulate")
+pti <- pti[!(pti %in% installed.packages())]
+if(length(pti)>0){
+    install.packages(pti)
+}
+library(reticulate)
+```
+
+Set the path to the correct version of Python using the use_python() function. While not strictly required, explicitly choosing a Python instance is a best practice. Once an instance is chosen for that session it cannot be changed.
+
+Instead of specifying the location of Python, we can use `repl_python` function too.
+
+```{r install2, message=FALSE, warning=FALSE, eval = FALSE}
+#use_python("/Users/egcanmac/opt/anaconda3/bin/python", required = T)
+
+#repl_python()
+```
+However, when writing a markdown document, you can also use Python code chunks by writing ` ```{python}` instead of ` ```{r}`.
+
+Python code chunks work exactly like R code chunks: Python code is executed and any print or graphical output is included within the document.
+
+Python chunks all execute within a single Python session so have access to all objects created in previous chunks. Chunk options like `echo`, `include` , etc. all work as expected.
+
+This is an R Markdown document that demonstrates it:
+
+A basic function to add strings together:
+```{python Hello World, echo=TRUE}
+a = "Hello" + " World"
+print(a)
+```
+A basic function to multiply strings with a number:
+```{python strings, echo=TRUE}
+a = "Hello"
+print(a*3 + "!")
+```
+A Python for loop:
+```{python for, echo=TRUE}
+s=0
+for i in range(10):
+  s=s+i
+print(s)
+```
+We can also do these in r chunks using the function `py_run_string` as well.
+
+```{r chunk}
+#Defining Variables in R
+a= "Hello"
+b= "World"
+
+#Using variables defined in R in Python
+py_run_string("print(r.a*3)")
+py_run_string("print(r.a+r.b)")
+
+#Using variables defined in Python in R
+py_run_string("a=[1,2,3,4,5]")
+a_r <- py$a
+print(a_r)
+```
+
+As you can see, the string results are the same. Also, the array that is defined in Python is again an array when it is called in R.
+
+A Python function to write Fibonacci series up to n:
+```{python function creation, echo=TRUE}
+def fib(n):
+  """Print a Fibonacci series up to n."""
+  a, b = 0, 1
+  while a < n:
+    print(a, end=' ')
+    a, b = b, a+b
+  print()
+```
+
+Let's call the function that we created above:
+```{python function call, echo=TRUE}
+fib(2000)
+```
+
+It can be seen that base Python can be run seamlessly in a RMarkdown document.
+
+We can even use Python libraries with the help of the function `py_run_string`:
+```{r run}
+py_run_string("import numpy as np")
+py_run_string("my_python_array = np.array([2,4,6,8])")
+```
+This is a numpy array that is defined in Python.
+```{r}
+py_run_string("print(my_python_array)")
+```
+As you can see, the array can be printed using `py_run_string` again.
+
+We can also print the array in R using the following notation:
+```{r}
+print(py$my_python_array)
+```
+
+Let's compare the types of the objects when they are printed in R and Python:
+```{r}
+py_run_string("print(type(my_python_array))")
+class(py$my_python_array)
+```
+
+When it is printed in Python, the object type is numpy array and when it is printed in R, the class is regular R array.
+
+We can use for loops for the array that we created inside `py_run_string`:
+```{r}
+py_run_string("for item in my_python_array: print(item)")
+```
+
+We can also import Python libraries to objects that we define in R:
+```{r}
+np<- import('numpy')
+```
+
+Let's create tow matrices:
+```{r}
+matrix1 <- matrix(data = 1:25, nrow = 5, ncol = 5)
+matrix2 <- matrix(data = 25:1, nrow = 5, ncol = 5)
+```
+
+Let's say we want to use the `matmul` function in the package numpy. We can do that in the following way:
+```{r}
+matrix3 <- np$matmul(matrix1, matrix2)
+
+class(matrix3)
+print(matrix3)
+```
+We used a Python library function successfully.
+
+Let's try to define some variables in Python and use them in R:
+
+```{r define variables}
+mpg <- mtcars$mpg
+cyl <- mtcars$cyl
+```
+
+We can use Python's pandas library to manipulate the data a bit:
+```{python call variables}
+import pandas as pd
+py_mpg = r.mpg
+py_cyl = r.cyl
+df=pd.DataFrame()
+df["mpg"]=py_mpg
+df["cyl"]=py_cyl
+df_filtered=df.loc[df['mpg'] > 16]
+df_filtered
+```
+Let's see this filtered dataframe in an R code:
+
+```{r}
+py$df_filtered
+```
+
+Let's try to draw a graph using matplotlib:
+```{python}
+import numpy as np
+import matplotlib.pyplot as plt
+import numpy.random as rng
+import matplotlib.cm as cm
+from matplotlib.animation import FuncAnimation
+
+radii=(rng.random(int(1e3))+1)**2
+iota=2*np.pi*rng.random(int(1e3))
+x_posit=np.sqrt(radii)*np.cos(iota)
+y_posit=np.sqrt(radii)*np.sin(iota)
+plt.plot(x_posit, y_posit, 'go')
+
+plt.show()
+```
+
+## References
+
+https://rstudio.github.io/reticulate/
+
+https://stackoverflow.com/questions/47689968/python-code-chunk-graphs-not-showing-up-in-r-markdown/52778656#52778656
